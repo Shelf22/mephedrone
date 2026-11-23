@@ -1,0 +1,184 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { spawn } from "child_process";
+import * as fs from "fs";
+
+import { calculateBitrate } from "../compression";
+import type { EncodeOptions } from "../types";
+import { getJob } from "./jobs";
+
+function getFfmpegCommand(): string {
+    return "ffmpeg";
+}
+
+// An exit code on its own says nothing useful (-2 is just ENOENT), so keep the
+// tail of FFmpeg's own diagnostics and report that instead.
+function describeFailure(stderr: string): string {
+    const lines = stderr
+        .split(/[\r\n]+/)
+        .map(line => line.trim())
+        .filter(line => line && !/^(frame|size)=/.test(line));
+    const tail = lines.slice(-3).join(" / ");
+    return tail ? `: ${tail}` : "";
+}
+
+export function startEncode(jobId: string, options: EncodeOptions): Promise<void> {
+    const job = getJob(jobId);
+    if (!job) return Promise.reject(new Error("Job not found"));
+    if (job.state !== "probing") return Promise.reject(new Error("Job is not ready to encode"));
+
+    job.state = "encoding";
+    job.progress = 0;
+    job.message = "Starting encode...";
+
+    const { duration, targetBytes, trimStart, trimEnd, removeAudio, resolution } = options;
+    const selectedDuration = trimEnd - trimStart;
+    const bitrate = calculateBitrate(selectedDuration, targetBytes, removeAudio);
+    const { audioBps, isValid } = bitrate;
+    let { videoBps } = bitrate;
+    if (!Number.isFinite(duration) || !Number.isFinite(trimStart) || !Number.isFinite(trimEnd)
+        || trimStart < 0 || trimEnd > duration + 0.1 || selectedDuration <= 0) {
+        return Promise.reject(new Error("Invalid trim range"));
+    }
+    if (!isValid) {
+        return Promise.reject(new Error("Target size is too small for this duration and audio setting."));
+    }
+
+    let filterComplex = "";
+    if (resolution) {
+        if (!["1080", "720", "480", "360", "240", "144"].includes(resolution)) {
+            return Promise.reject(new Error("Invalid resolution"));
+        }
+        filterComplex = `scale=-2:'trunc(min(${resolution},ih)/2)*2'`;
+    }
+
+    // Default filters
+    const vf = `${filterComplex || "scale=trunc(iw/2)*2:trunc(ih/2)*2"},format=yuv420p`;
+
+    const commonArgs = () => [
+        "-y",
+        "-ss", trimStart.toString(),
+        "-t", (trimEnd - trimStart).toString(),
+        "-i", job.inputPath,
+        "-map", "0:v:0", "-map", "0:a:0?",
+        "-c:v", "libx264",
+        "-vf", vf,
+        // Left on auto, frame sync follows the muxer: the null muxer passes frames
+        // through while MP4 pads gaps with duplicates, so pass 2 would encode frames
+        // pass 1 never recorded and x264 aborts on the short stats file.
+        "-fps_mode", "cfr",
+        "-b:v", `${videoBps}`,
+        "-passlogfile", job.passlogPath
+    ];
+
+    const pass1Args = () => [
+        ...commonArgs(),
+        "-an",
+        "-pass", "1",
+        // The null muxer discards the output itself, so pass 1 never has to name a
+        // platform-specific device. NUL and /dev/null both depend on the child's
+        // working directory resolving, which is not guaranteed under Discord.
+        "-f", "null", "-"
+    ];
+
+    const pass2Args = () => [
+        ...commonArgs(),
+        "-pass", "2",
+        ...(removeAudio ? ["-an"] : ["-c:a", "aac", "-b:a", `${audioBps}`]),
+        "-movflags", "+faststart",
+        job.outputPath
+    ];
+
+    return new Promise((resolve, reject) => {
+        const runPass = (args: string[], passNum: number, attempt: number): Promise<void> => {
+            return new Promise((res, rej) => {
+                if (job.state === "canceled") {
+                    return rej(new Error("Canceled"));
+                }
+                job.message = attempt === 1 ? `Encoding pass ${passNum}...` : `Recompressing to fit the upload limit (attempt ${attempt}/3), pass ${passNum}...`;
+                job.progress = passNum === 1 ? 0 : 50;
+
+                const proc = spawn(getFfmpegCommand(), args, {
+                    shell: false,
+                    windowsHide: true,
+                    cwd: job.dir,
+                    stdio: ["ignore", "ignore", "pipe"]
+                });
+                job.process = proc;
+
+                let stderrTail = "";
+                proc.stderr.on("data", chunk => {
+                    const output = chunk.toString();
+                    stderrTail = (stderrTail + output).slice(-4000);
+                    const match = output.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/);
+                    if (match) {
+                        const h = parseFloat(match[1]);
+                        const m = parseFloat(match[2]);
+                        const s = parseFloat(match[3]);
+                        const time = h * 3600 + m * 60 + s;
+                        const p = Math.min(50, (time / selectedDuration) * 50);
+                        job.progress = (passNum === 1 ? 0 : 50) + p;
+                    }
+                });
+
+                proc.on("error", err => rej(new Error(`FFmpeg error on pass ${passNum}: ${err.message}`)));
+                proc.on("close", code => {
+                    job.process = undefined;
+                    if (code !== 0) rej(new Error(`FFmpeg exited with code ${code} on pass ${passNum}${describeFailure(stderrTail)}`));
+                    else res();
+                });
+            });
+        };
+
+        const encode = async () => {
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    await runPass(pass1Args(), 1, attempt);
+                    await runPass(pass2Args(), 2, attempt);
+                } catch (err) {
+                    if (attempt === 1 || job.state === "canceled") throw err;
+                    throw new Error(`Could not recompress at a lower bitrate. Try a lower resolution, a shorter selection, or remove audio. ${(err as Error).message}`);
+                }
+                if (job.state === "canceled") throw new Error("Canceled");
+
+                job.state = "verifying";
+                job.message = "Verifying output...";
+                const stat = fs.statSync(job.outputPath);
+                if (stat.size <= 0) throw new Error("FFmpeg produced an empty video.");
+                if (stat.size <= targetBytes) {
+                    job.bytesTotal = stat.size;
+                    job.state = "ready";
+                    job.progress = 100;
+                    job.message = "Ready";
+                    return;
+                }
+
+                // Two-pass bitrate is a target, not a file-size cap. Account for
+                // the audio budget separately so it does not dilute the correction
+                // when audio occupies most of the file. Leave extra room on retries
+                // for AAC variation and MP4 overhead; always recheck the actual size.
+                const audioBytes = audioBps * selectedDuration / 8;
+                const videoBudget = targetBytes * 0.95 - audioBytes;
+                const measuredVideoBytes = Math.max(1, stat.size - audioBytes);
+                videoBps = Math.floor(videoBps * Math.min(0.9, videoBudget / measuredVideoBytes));
+                if (videoBps <= 0) break;
+                job.state = "encoding";
+            }
+            throw new Error("Encoded video still exceeds the upload limit after recompressing. Try a lower resolution, a shorter selection, or remove audio.");
+        };
+
+        encode()
+            .then(resolve)
+            .catch(err => {
+                if (job.state !== "canceled") {
+                    job.state = "error";
+                    job.message = err.message;
+                }
+                reject(err);
+            });
+    });
+}

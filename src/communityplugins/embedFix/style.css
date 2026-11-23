@@ -1,0 +1,277 @@
+/*
+ * Vencord userplugin — embedFix
+ * Authors: kamaras
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/* Accessory container — Discord's own embed markup does the heavy lifting. */
+.vc-embedFix-accessory {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vc-embedFix-embed {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.vc-embedFix-badgeRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+
+.vc-embedFix-embed:hover .vc-embedFix-badgeRow,
+.vc-embedFix-embed:focus-within .vc-embedFix-badgeRow {
+    opacity: 1;
+}
+
+.vc-embedFix-badge {
+    color: var(--text-muted, #949ba4);
+    font-size: 0.6875rem;
+    line-height: 1.2;
+}
+
+.vc-embedFix-refresh {
+    padding: 0 4px;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--text-muted, #949ba4);
+    cursor: pointer;
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+.vc-embedFix-refresh:hover {
+    background: var(--background-modifier-hover, #35373c);
+    color: var(--interactive-hover, #dbdee1);
+}
+
+/* Fallback card, used only if Discord's Embed component cannot be found. */
+.vc-embedFix-card {
+    --vc-embedFix-accent: var(--brand-500, #5865f2);
+    box-sizing: border-box;
+    display: grid;
+    max-width: 432px;
+    padding: 8px 12px;
+    border-left: 4px solid var(--vc-embedFix-accent);
+    border-radius: 4px;
+    background: var(--background-secondary, #2b2d31);
+    color: var(--text-normal, #dbdee1);
+}
+
+.vc-embedFix-cardBody {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.vc-embedFix-cardSource {
+    color: var(--text-muted, #949ba4);
+    font-size: 0.75rem;
+    line-height: 1.25;
+}
+
+.vc-embedFix-cardTitle {
+    color: var(--text-link, #00a8fc);
+    font-weight: 600;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+}
+
+.vc-embedFix-cardTitle:hover {
+    text-decoration: underline;
+}
+
+.vc-embedFix-cardDescription {
+    color: var(--text-normal, #dbdee1);
+    font-size: 0.875rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.vc-embedFix-cardImage {
+    display: block;
+    max-width: min(100%, 400px);
+    max-height: 300px;
+    border-radius: 4px;
+    object-fit: contain;
+}
+
+.vc-embedFix-priorityEditor {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: min(100%, 720px);
+}
+
+.vc-embedFix-priorityHeader,
+.vc-embedFix-priorityPlatformHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.vc-embedFix-priorityHeader {
+    color: var(--text-muted, #949ba4);
+    font-size: 0.875em;
+}
+
+.vc-embedFix-priorityPlatform {
+    border: 1px solid var(--background-modifier-accent, #3f4147);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.vc-embedFix-priorityPlatformHeader {
+    padding: 8px 10px;
+    background: var(--background-secondary-alt, #2b2d31);
+    color: var(--header-primary, #f2f3f5);
+    font-weight: 700;
+}
+
+.vc-embedFix-priorityList {
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-embedFix-priorityItem {
+    display: grid;
+    grid-template-columns: 18px 28px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 7px 10px;
+    border-top: 1px solid var(--background-modifier-accent, #3f4147);
+    background: var(--background-primary, #313338);
+}
+
+.vc-embedFix-priorityItemDragging {
+    opacity: 0.55;
+}
+
+.vc-embedFix-priorityHandle {
+    color: var(--interactive-muted, #4e5058);
+    cursor: grab;
+    font-weight: 700;
+    letter-spacing: 0;
+    user-select: none;
+}
+
+.vc-embedFix-priorityRank {
+    color: var(--text-muted, #949ba4);
+    font-variant-numeric: tabular-nums;
+}
+
+.vc-embedFix-priorityText {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.vc-embedFix-priorityLabel {
+    color: var(--text-normal, #dbdee1);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-embedFix-priorityDomain {
+    color: var(--text-muted, #949ba4);
+    font-size: 0.8125em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-embedFix-priorityActions {
+    display: flex;
+    gap: 4px;
+}
+
+.vc-embedFix-priorityMove {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--background-modifier-hover, #35373c);
+    color: var(--interactive-normal, #b5bac1);
+    cursor: pointer;
+}
+
+.vc-embedFix-priorityMove:hover:not(:disabled) {
+    background: var(--background-modifier-selected, #404249);
+    color: var(--interactive-hover, #dbdee1);
+}
+
+.vc-embedFix-priorityMove:disabled {
+    cursor: default;
+    opacity: 0.35;
+}
+
+/* Click-to-load video for CSP-blocked provider hosts. */
+.vc-embedFix-cardVideo {
+    display: block;
+    max-width: min(100%, 432px);
+    max-height: 340px;
+    margin-top: 4px;
+    border-radius: 4px;
+    background: #000;
+}
+
+.vc-embedFix-playButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: min(100%, 432px);
+    min-height: 64px;
+    margin-top: 4px;
+    padding: 10px 14px;
+    border: 1px solid var(--background-modifier-accent, #3f4147);
+    border-radius: 4px;
+    background-color: var(--background-secondary, #2b2d31);
+    background-position: center;
+    background-size: cover;
+    color: var(--text-normal, #dbdee1);
+    cursor: pointer;
+    text-align: left;
+}
+
+.vc-embedFix-playButton:hover:not(:disabled) {
+    border-color: var(--text-link, #00a8fc);
+}
+
+.vc-embedFix-playButton:disabled {
+    cursor: default;
+    opacity: 0.7;
+}
+
+.vc-embedFix-playGlyph {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 65%);
+    color: #fff;
+    font-size: 0.875rem;
+}
+
+.vc-embedFix-playLabel {
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgb(0 0 0 / 55%);
+    color: #fff;
+    font-size: 0.8125rem;
+}

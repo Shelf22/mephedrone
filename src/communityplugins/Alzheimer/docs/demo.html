@@ -1,0 +1,395 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Alzheimer — documentation demo</title>
+<style>
+:root{--text-muted:#a9aab2;--text-default:#d9d9e0;--text-strong:#f2f3f5;--background-base-low:#292a31;--brand-500:#8b75ff;--status-positive:#23a55a;--status-warning:#f0b232;--status-danger:#f23f43;--interactive-icon-default:#b8bac4}
+*{box-sizing:border-box}body{margin:0;background:#17181e;color:#ececf1;font-family:Arial,sans-serif;padding:44px}h1{font-size:32px;margin:14px 0}h2{font-size:18px;margin:0}p{color:#b4b5c0;font-size:15px;line-height:1.6}.tag{font-size:11px;letter-spacing:1.5px;color:#b9aaff;font-weight:bold}.subtitle{margin-bottom:28px}.layout{display:grid;grid-template-columns:390px 1fr;gap:30px}.sidebar{background:#22232b;border:1px solid #373944;border-radius:14px;padding:20px}.category{font-size:12px;color:#b8bac8;text-transform:uppercase;letter-spacing:1px;margin:10px 0 12px}.row{display:flex;align-items:center;gap:12px;padding:12px 8px;height:60px;border-radius:7px}.row:hover{background:#30313a}.avatar{width:32px;height:32px;border-radius:50%;background:#484265;display:grid;place-items:center;color:#e0daff;font-size:12px}.name{flex:1;font-size:15px;font-weight:600}.ordinary{opacity:.6;border-top:1px solid #41424e;margin-top:8px;padding-top:8px}.explanation{padding:8px 0}.detail{padding:10px 0 15px;border-bottom:1px solid #343640}.detail strong{font-size:15px}.detail p{margin:5px 0;font-size:14px}.footer{margin-top:24px;font-size:12px;color:#9a9ca9}.notification-stage{height:245px;background:#22232b;border:1px solid #373944;border-radius:14px;position:relative;padding:24px}.notification-stage p{max-width:360px}.vc-notification-root:not(.vc-notification-log-wrapper > .vc-notification-root){width:400px!important;bottom:24px!important;right:24px!important;min-height:100px}.vc-notification-title{margin:0}.notification-stage .hint{font-size:13px;position:absolute;bottom:26px;left:24px}.notification-page{display:none}
+.vc-alzheimer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 110px;
+    margin-left: 4px;
+    font-size: 10px;
+    line-height: 16px;
+    white-space: nowrap;
+    color: var(--text-muted);
+}
+
+.vc-alzheimer-time {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vc-alzheimer-reply {
+    flex-shrink: 0;
+}
+
+.vc-alzheimer-green {
+    color: var(--status-positive, #23a55a);
+}
+
+.vc-alzheimer-yellow {
+    color: var(--status-warning, #f0b232);
+}
+
+.vc-alzheimer-red {
+    color: var(--status-danger, #f23f43);
+}
+
+.vc-notification-root {
+    /* clear default button styles */
+    all: unset;
+    display: flex;
+    flex-direction: column;
+    color: var(--text-default);
+    background-color: var(--background-base-low);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    width: 100%;
+}
+
+.vc-notification-root:not(.vc-notification-log-wrapper > .vc-notification-root) {
+    position: absolute;
+    z-index: 2147483647;
+    right: 1rem;
+    width: min(25vw, 400px);
+    min-height: 10vh;
+}
+
+.vc-notification {
+    display: flex;
+    flex-direction: row;
+    padding: 1.25rem;
+    gap: 1.25rem;
+}
+
+.vc-notification-content {
+    width: 100%;
+    overflow: hidden;
+}
+
+.vc-notification-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.vc-notification-title {
+    color: var(--text-strong);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    text-transform: uppercase;
+}
+
+.vc-notification-close-btn {
+    all: unset;
+    cursor: pointer;
+    color: var(--interactive-icon-default);
+    opacity: 0.5;
+    transition: opacity 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.vc-notification-close-btn:hover {
+    color: var(--interactive-icon-hover);
+    opacity: 1;
+}
+
+.vc-notification-icon {
+    height: 4rem;
+    width: 4rem;
+    border-radius: 6px;
+}
+
+.vc-notification-progressbar {
+    height: 0.25rem;
+    border-radius: 5px;
+    margin-top: auto;
+}
+
+.vc-notification-p {
+    margin: 0.5rem 0 0;
+    line-height: 140%;
+}
+
+.vc-notification-img {
+    width: 100%;
+}
+
+.vc-notification-log-modal {
+    max-width: 962px;
+    width: clamp(var(--modal-width-large, 800px), 962px, 85vw);
+}
+
+.vc-notification-log-empty {
+    height: 218px;
+    background: url("/assets/b36de980b174d7b798c89f35c116e5c6.svg") center no-repeat;
+    margin-bottom: 40px;
+}
+
+.vc-notification-log-wrapper {
+    height: 120px;
+    width: 100%;
+    padding-bottom: 16px;
+    box-sizing: border-box;
+    transition: 200ms ease;
+    transition-property: height, opacity;
+
+    /* stylelint-disable-next-line no-descending-specificity */
+    .vc-notification-root {
+        height: 104px;
+    }
+}
+
+.vc-notification-log-removing {
+    height: 0 !important;
+    opacity: 0;
+    margin-bottom: 1em;
+}
+
+.vc-notification-log-body-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.vc-notification-log-body {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 1.2em;
+}
+
+.vc-notification-log-timestamp {
+    margin-left: auto;
+    font-size: 0.8em;
+    font-weight: lighter;
+}
+
+.vc-notification-log-danger-btn {
+    color: var(--control-critical-primary-text-default);
+    background-color: var(--control-critical-primary-background-default);
+}
+</style>
+<section id="activity-page"><div class="tag">DOCUMENTATION DEMO · FICTIONAL CONTACTS · SIMULATED AGES</div><h1>Your pinned conversations, at a glance</h1><p class="subtitle">Badges below are rendered from the Alzheimer plugin component. The surrounding DM list is a simplified demo.</p><div class="layout"><div class="sidebar"><div class="category">⌄ Friends · manually ordered</div><div id="rows"></div><div class="ordinary"><div class="category">Direct messages</div><div class="row"><span class="avatar">J</span><span class="name">Jamie</span></div></div></div><div class="explanation"><div class="detail"><strong>12 hours ago · Neutral</strong><p>Less than 24 hours since the latest message.</p></div><div class="detail"><strong style="color:#23a55a">24 hours ago · Green</strong><p>24 to under 48 hours. No reminders yet.</p></div><div class="detail"><strong style="color:#f0b232">52 hours ago · Yellow + reply arrow</strong><p>Anna sent the latest message. Reminders are eligible.</p></div><div class="detail"><strong style="color:#f23f43">72 hours ago · Red</strong><p>The reply arrow can remain, but reminders stop.</p></div><div class="detail"><strong>Yellow without an arrow</strong><p>You sent the latest message. No reminder.</p></div><div class="detail"><strong>Yellow with an unknown sender</strong><p>No arrow or reminder until Discord confirms the sender.</p></div></div></div><div class="footer">Hover a badge for its timestamp and reply tooltip. Opening a DM does not reset its age.</div></section>
+<section class="notification-page" id="notification-page"><div class="tag">DOCUMENTATION DEMO · SIMULATED IN-APP NOTIFICATION</div><h1>A reminder when a reply is due</h1><p class="subtitle">The shared Equicord notification component, rendered with fictional reminder data.</p><div class="notification-stage"><h2>Yellow + waiting for your reply</h2><p>First reminder at 48 hours.<br>Repeat every two hours while eligible.<br>Stop at 72 hours or after a new message.</p><div class="hint">In Discord, clicking the reminder opens Anna's DM.</div><div id="notification"></div></div><div class="footer">Desktop notification appearance depends on Windows. This demo does not send a notification or open Discord.</div></section>
+<script>
+globalThis.demoElement=(type,props,...children)=>{const p={...props,children:children.length===1?children[0]:children};if(typeof type==='function')return type(p);const node=document.createElementNS(type==='svg'||type==='path'?'http://www.w3.org/2000/svg':'http://www.w3.org/1999/xhtml',type);for(const [key,value] of Object.entries(props||{})){if(key==='style')Object.assign(node.style,value);else if(key.startsWith('on'))continue;else if(value!=null&&value!==false)node.setAttribute(key==='className'?'class':key,String(value));}const append=x=>{if(Array.isArray(x))x.forEach(append);else if(x!=null&&x!==false)node.append(x instanceof Node?x:document.createTextNode(String(x)));};children.forEach(append);return node;};
+globalThis.demoActivities={};
+(() => {
+  // demo:@api/Settings
+  var definePluginSettings = (x) => x;
+  var useSettings = () => ({ notifications: { timeout: 5e3, position: "bottom-right" } });
+
+  // demo:@components/ErrorBoundary
+  var ErrorBoundary_default = { wrap: (x) => x };
+
+  // demo:@utils/css
+  var classNameFactory = (prefix) => (...names) => names.map((x) => prefix + x).join(" ");
+
+  // demo:@utils/react
+  var useTimer = () => {
+  };
+
+  // demo:@utils/types
+  var types_default = (x) => x;
+  var OptionType = { BOOLEAN: 1 };
+
+  // demo:@webpack/common
+  var ChannelStore = {};
+  var MessageStore = {};
+  var ReadStateStore = {};
+  var UserStore = { getCurrentUser: () => ({ id: "self" }) };
+  var Tooltip = ({ text, children }) => children({ title: text });
+  var useStateFromStores = (_, selector) => selector();
+  var useEffect = () => {
+  };
+  var useRef = (x) => ({ current: x });
+  var useState = (x) => [x, () => {
+  }];
+
+  // demo:./activity
+  var ActivityStore = { enabled: true, getActivity: (id) => globalThis.demoActivities[id] };
+  var pinnedIds = () => Object.keys(globalThis.demoActivities);
+
+  // core.ts
+  var HOUR = 60 * 60 * 1e3;
+  var REMINDER_INTERVAL = 2 * HOUR;
+  function activityColor(timestamp, now) {
+    const age = Math.max(0, now - timestamp);
+    if (age >= 72 * HOUR) return "red";
+    if (age >= 48 * HOUR) return "yellow";
+    if (age >= 24 * HOUR) return "green";
+    return "neutral";
+  }
+  var relativeTime = new Intl.RelativeTimeFormat("en", { numeric: "always" });
+  function elapsedLabel(timestamp, now) {
+    const minutes = Math.floor(Math.max(0, now - timestamp) / 6e4);
+    if (minutes === 0) return "Just now";
+    return minutes < 60 ? relativeTime.format(-minutes, "minute") : relativeTime.format(-Math.floor(minutes / 60), "hour");
+  }
+
+  // demo:./reminders
+  var reconnect = () => {
+  };
+  var refresh = () => {
+  };
+  var startReminders = () => {
+  };
+  var stopReminders = () => {
+  };
+
+  // index.tsx
+  var cl = classNameFactory("vc-alzheimer-");
+  var pinPaths = ["plugins.PinDMs.userBasedCategoryList"];
+  var settings = definePluginSettings({
+    enableReminders: {
+      type: OptionType.BOOLEAN,
+      displayName: "Enable reminders",
+      description: "Remind you every two hours while a pinned DM is yellow and waiting for your reply.",
+      default: true
+    }
+  });
+  function ActivityBadge({ channel, type }) {
+    useSettings(pinPaths);
+    useTimer({ interval: 6e4 });
+    const userId = useStateFromStores([UserStore], () => UserStore.getCurrentUser()?.id);
+    const enabled = useStateFromStores([ActivityStore], () => ActivityStore.enabled);
+    const activity = useStateFromStores([ActivityStore, ChannelStore, MessageStore, ReadStateStore], () => channel && ActivityStore.getActivity(channel.id), [channel?.id], (a, b) => a?.messageId === b?.messageId && a?.authorId === b?.authorId);
+    if (!enabled || type !== "dm" || !channel?.isDM() || !pinnedIds(userId).includes(channel.id) || !activity) return null;
+    const now = Date.now();
+    const waiting = Boolean(userId && activity.authorId && activity.authorId !== userId);
+    const label = elapsedLabel(activity.timestamp, now);
+    const tooltip = `${waiting ? "Waiting for your reply. " : ""}Last message: ${new Date(activity.timestamp).toLocaleString("en-US")}.${!activity.authorId ? " Latest sender is unavailable." : ""}`;
+    return /* @__PURE__ */ globalThis.demoElement(Tooltip, { text: tooltip }, (props) => /* @__PURE__ */ globalThis.demoElement("span", { ...props, className: cl("badge", activityColor(activity.timestamp, now)), "aria-label": `${label}${waiting ? ". Waiting for your reply" : ""}` }, /* @__PURE__ */ globalThis.demoElement("span", { className: cl("time") }, label), waiting && /* @__PURE__ */ globalThis.demoElement("svg", { className: cl("reply"), width: "14", height: "14", viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": "true" }, /* @__PURE__ */ globalThis.demoElement("path", { d: "M10 5a1 1 0 0 1 1 1v3h3a7 7 0 0 1 7 7v2a1 1 0 0 1-2 0v-2a5 5 0 0 0-5-5h-3v3a1 1 0 0 1-1.64.77l-6-5a1 1 0 0 1 0-1.54l6-5A1 1 0 0 1 10 5Z" }))));
+  }
+  var SafeActivityBadge = ErrorBoundary_default.wrap(ActivityBadge, { noop: true });
+  var index_default = types_default({
+    name: "Alzheimer",
+    description: "Keep pinned DMs in view, track inactivity, and remind you when a friend is waiting for your reply.",
+    authors: [{ name: "TheRealMagyar", id: 462651633709613056n }],
+    dependencies: ["PinDMs", "MemberListDecoratorsAPI"],
+    settings,
+    renderMemberListDecorator: (props) => /* @__PURE__ */ globalThis.demoElement(SafeActivityBadge, { ...props }),
+    start: startReminders,
+    stop: stopReminders,
+    flux: {
+      CONNECTION_OPEN: reconnect,
+      MESSAGE_DELETE({ channelId, id }) {
+        if (ActivityStore.removeMessages(channelId, [id])) reconnect();
+      },
+      MESSAGE_DELETE_BULK({ channelId, ids }) {
+        if (ActivityStore.removeMessages(channelId, ids)) reconnect();
+      },
+      LOGOUT: refresh
+    }
+  });
+
+  // demo:@utils/misc
+  var classes = (...x) => x.filter(Boolean).join(" ");
+
+  // ../../../Equicord/src/api/Notifications/NotificationComponent.tsx
+  var NotificationComponent_default = ErrorBoundary_default.wrap(function NotificationComponent({
+    title,
+    body,
+    richBody,
+    color,
+    icon,
+    onClick,
+    onClose,
+    image,
+    permanent,
+    className,
+    dismissOnClick
+  }) {
+    const { timeout, position } = useSettings(["notifications.timeout", "notifications.position"]).notifications;
+    const [isHover, setIsHover] = useState(false);
+    const [elapsed, setElapsed] = useState(0);
+    const start = useRef(Date.now());
+    const pause = useRef(null);
+    useEffect(() => {
+      if (timeout === 0 || permanent) return;
+      if (isHover) {
+        if (pause.current === null) pause.current = Date.now();
+        return;
+      }
+      if (pause.current !== null) {
+        const pausedFor = Date.now() - pause.current;
+        start.current += pausedFor;
+        pause.current = null;
+      }
+      const intervalId = setInterval(() => {
+        const elapsedNow = Date.now() - start.current;
+        if (elapsedNow >= timeout) {
+          onClose();
+        } else {
+          setElapsed(elapsedNow);
+        }
+      }, 10);
+      return () => clearInterval(intervalId);
+    }, [timeout, isHover, permanent]);
+    const timeoutProgress = elapsed / timeout;
+    return /* @__PURE__ */ globalThis.demoElement(
+      "button",
+      {
+        className: classes("vc-notification-root", className),
+        style: position === "bottom-right" ? { bottom: "1rem" } : { top: "3rem" },
+        onClick: () => {
+          onClick?.();
+          if (dismissOnClick !== false)
+            onClose();
+        },
+        onContextMenu: (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose();
+        },
+        onMouseEnter: () => setIsHover(true),
+        onMouseLeave: () => setIsHover(false)
+      },
+      /* @__PURE__ */ globalThis.demoElement("div", { className: "vc-notification" }, icon && /* @__PURE__ */ globalThis.demoElement("img", { className: "vc-notification-icon", src: icon, alt: "" }), /* @__PURE__ */ globalThis.demoElement("div", { className: "vc-notification-content" }, /* @__PURE__ */ globalThis.demoElement("div", { className: "vc-notification-header" }, /* @__PURE__ */ globalThis.demoElement("h2", { className: "vc-notification-title" }, title), /* @__PURE__ */ globalThis.demoElement(
+        "button",
+        {
+          className: "vc-notification-close-btn",
+          onClick: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClose();
+          }
+        },
+        /* @__PURE__ */ globalThis.demoElement(
+          "svg",
+          {
+            width: "24",
+            height: "24",
+            viewBox: "0 0 24 24",
+            role: "img",
+            "aria-labelledby": "vc-notification-dismiss-title"
+          },
+          /* @__PURE__ */ globalThis.demoElement("title", { id: "vc-notification-dismiss-title" }, "Dismiss Notification"),
+          /* @__PURE__ */ globalThis.demoElement("path", { fill: "currentColor", d: "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" })
+        )
+      )), richBody ?? /* @__PURE__ */ globalThis.demoElement("p", { className: "vc-notification-p" }, body))),
+      image && /* @__PURE__ */ globalThis.demoElement("img", { className: "vc-notification-img", src: image, alt: "" }),
+      timeout !== 0 && !permanent && /* @__PURE__ */ globalThis.demoElement(
+        "div",
+        {
+          className: "vc-notification-progressbar",
+          style: { width: `${(1 - timeoutProgress) * 100}%`, backgroundColor: color || "var(--brand-500)" }
+        }
+      )
+    );
+  }, {
+    onError: ({ props }) => props.onClose()
+  });
+
+  // <stdin>
+  globalThis.demoPlugin = index_default;
+  globalThis.demoNotification = NotificationComponent_default;
+})();
+
+const examples=[['Alex',12,'friend'],['Ben',24,'self'],['Anna',52,'friend'],['Chris',72,'friend'],['Dana',52,'self'],['Morgan',48,undefined]];
+examples.forEach(([name,age,authorId],i)=>{const id='demo-'+i;demoActivities[id]={messageId:id,timestamp:Date.now()-age*3600000,authorId};const row=document.createElement('div');row.className='row';row.innerHTML='<span class="avatar">'+name[0]+'</span><span class="name">'+name+'</span>';row.append(demoPlugin.renderMemberListDecorator({type:'dm',channel:{id,isDM:()=>true}}));document.getElementById('rows').append(row);});
+document.getElementById('notification').append(demoNotification({title:'Anna is waiting for your reply',body:'Your last exchange was 52 hours ago.',onClose:()=>{},onClick:()=>{}}));
+if(location.hash==='#notification'){document.getElementById('activity-page').style.display='none';document.getElementById('notification-page').style.display='block';}
+</script></html>

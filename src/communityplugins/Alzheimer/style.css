@@ -1,0 +1,32 @@
+.vc-alzheimer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 110px;
+    margin-left: 4px;
+    font-size: 10px;
+    line-height: 16px;
+    white-space: nowrap;
+    color: var(--text-muted);
+}
+
+.vc-alzheimer-time {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vc-alzheimer-reply {
+    flex-shrink: 0;
+}
+
+.vc-alzheimer-green {
+    color: var(--status-positive, #23a55a);
+}
+
+.vc-alzheimer-yellow {
+    color: var(--status-warning, #f0b232);
+}
+
+.vc-alzheimer-red {
+    color: var(--status-danger, #f23f43);
+}

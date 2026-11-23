@@ -1,0 +1,629 @@
+.vc-gif-vault-pickerButton {
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.vc-gif-vault-modalTitle {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.vc-gif-vault-maximizeButton {
+    background: var(--background-tertiary);
+    border: 0;
+    border-radius: 4px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    padding: 5px 8px;
+}
+
+.vc-gif-vault-maximizeButton:hover {
+    background: var(--background-modifier-hover);
+    color: var(--interactive-hover);
+}
+
+.vc-gif-vault {
+    box-sizing: border-box;
+    --vc-gif-vault-row-height: 222px;
+    --vc-gif-vault-preview-height: 130px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: min(64vh, 650px, calc(100vh - 220px));
+    min-height: min(340px, calc(100vh - 220px));
+    overflow: hidden;
+    padding: 2px;
+}
+
+.vc-gif-vault-maximized {
+    --vc-gif-vault-preview-height: clamp(200px, 24vh, 320px);
+    height: calc(95vh - 160px);
+    min-height: 0;
+}
+
+.vc-gif-vault-maximized.vc-gif-vault-medium {
+    --vc-gif-vault-preview-height: clamp(240px, 28vh, 380px);
+}
+
+.vc-gif-vault-maximized.vc-gif-vault-large {
+    --vc-gif-vault-preview-height: clamp(260px, 32vh, 420px);
+}
+
+.vc-gif-vault-medium {
+    --vc-gif-vault-row-height: 262px;
+    --vc-gif-vault-preview-height: 170px;
+}
+
+.vc-gif-vault-large {
+    --vc-gif-vault-row-height: 310px;
+    --vc-gif-vault-preview-height: 200px;
+}
+
+.vc-gif-vault-random,
+.vc-gif-vault-library {
+    box-sizing: border-box;
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.vc-gif-vault-random {
+    width: 100%;
+}
+
+.vc-gif-vault-library {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.vc-gif-vault-randomPreview,
+.vc-gif-vault-libraryHeading,
+.vc-gif-vault-libraryTools,
+.vc-gif-vault-libraryActions,
+.vc-gif-vault-createFolder,
+.vc-gif-vault-actions {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+}
+
+.vc-gif-vault-randomPreview {
+    align-items: stretch;
+}
+
+.vc-gif-vault-preview,
+.vc-gif-vault-previewPlaceholder {
+    background: var(--background-tertiary);
+    border-radius: 8px;
+    flex: 0 0 340px;
+    height: 180px;
+    object-fit: contain;
+    width: 340px;
+}
+
+.vc-gif-vault-fullscreenPreview {
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    cursor: zoom-in;
+    flex: 0 0 340px;
+    height: 180px;
+    overflow: hidden;
+    padding: 0;
+    width: 340px;
+}
+
+.vc-gif-vault-fullscreenPreview:hover,
+.vc-gif-vault-fullscreenPreview:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: -2px;
+}
+
+.vc-gif-vault-maximized .vc-gif-vault-fullscreenPreview,
+.vc-gif-vault-maximized .vc-gif-vault-previewPlaceholder {
+    flex-basis: clamp(400px, 35vw, 640px);
+    height: clamp(240px, 28vh, 420px);
+    width: clamp(400px, 35vw, 640px);
+}
+
+.vc-gif-vault-maximized .vc-gif-vault-fullscreenPreview .vc-gif-vault-preview {
+    height: 100%;
+    width: 100%;
+}
+
+.vc-gif-vault-previewCompact {
+    border-radius: 5px;
+    height: 100%;
+    max-height: none;
+    width: 100%;
+}
+
+.vc-gif-vault-previewPlaceholder {
+    align-items: center;
+    color: var(--text-muted);
+    display: flex;
+    font-size: 24px;
+    font-weight: 700;
+    justify-content: center;
+}
+
+.vc-gif-vault-randomInfo {
+    align-items: flex-start;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+    min-width: 0;
+}
+
+.vc-gif-vault-randomInfo h3,
+.vc-gif-vault-libraryHeading h3 {
+    color: var(--header-primary);
+    font-size: 16px;
+    margin: 0;
+}
+
+.vc-gif-vault-libraryHeading span {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin: 0;
+}
+
+.vc-gif-vault-randomInfo strong {
+    color: var(--header-primary);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-gif-vault-folderLabel {
+    background: var(--background-tertiary);
+    border-radius: 4px;
+    color: var(--text-normal);
+    font-size: 11px;
+    padding: 3px 7px;
+}
+
+.vc-gif-vault-actions {
+    margin-top: 4px;
+}
+
+.vc-gif-vault-libraryHeading,
+.vc-gif-vault-libraryTools {
+    justify-content: space-between;
+}
+
+.vc-gif-vault-libraryHeading > div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vc-gif-vault-createFolder {
+    flex: 0 1 360px;
+}
+
+.vc-gif-vault-libraryActions {
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.vc-gif-vault-layoutOptions {
+    background: var(--background-tertiary);
+    border-radius: 6px;
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+}
+
+.vc-gif-vault-layoutOptions button {
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    flex-shrink: 0;
+    font: inherit;
+    font-size: 12px;
+    min-width: 64px;
+    padding: 6px 10px;
+    transition:
+        background 120ms ease,
+        color 120ms ease;
+    white-space: nowrap;
+}
+
+.vc-gif-vault-layoutOptions button:hover {
+    background: var(--background-modifier-hover);
+    color: var(--interactive-hover);
+}
+
+.vc-gif-vault-layoutOptions button.vc-gif-vault-layoutSelected {
+    background: var(--background-modifier-selected);
+    color: var(--header-primary);
+}
+
+.vc-gif-vault-layoutOptions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.vc-gif-vault-createFolder > :first-child,
+.vc-gif-vault-libraryTools > :first-child {
+    flex: 1;
+    min-width: 120px;
+}
+
+.vc-gif-vault-sortWrapper {
+    box-sizing: border-box;
+    flex: 0 0 240px;
+    max-width: 100%;
+    min-width: 0;
+    width: 240px;
+}
+
+.vc-gif-vault-sort {
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    width: 100%;
+}
+
+.vc-gif-vault-sort [class*="control"],
+.vc-gif-vault-sort [class*="valueContainer"] {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.vc-gif-vault-sort [class*="placeholder"],
+.vc-gif-vault-sort [class*="singleValue"] {
+    color: var(--text-normal);
+    display: block;
+    flex: 1 1 auto;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-gif-vault-libraryTools {
+    margin: 16px 0 10px;
+}
+
+.vc-gif-vault-count,
+.vc-gif-vault-folderCount {
+    color: var(--text-muted);
+    flex: none;
+    font-size: 12px;
+}
+
+.vc-gif-vault-folderTabs {
+    flex: none;
+    height: 44px;
+    margin-bottom: 14px;
+    width: 100%;
+}
+
+.vc-gif-vault-folderTabList {
+    border-bottom: 1px solid var(--background-modifier-accent);
+    display: flex;
+    gap: 6px;
+    min-width: 100%;
+    padding-bottom: 10px;
+    width: max-content;
+}
+
+.vc-gif-vault-folderTab {
+    align-items: center;
+    background: var(--background-tertiary);
+    border-radius: 6px;
+    display: inline-flex;
+    flex: none;
+    overflow: hidden;
+}
+
+.vc-gif-vault-folderTab > button {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    gap: 8px;
+    min-height: 32px;
+    padding: 0 10px;
+}
+
+.vc-gif-vault-folderTab > button:hover {
+    background: var(--background-modifier-hover);
+    color: var(--interactive-hover);
+}
+
+.vc-gif-vault-folderTabSelected {
+    background: var(--background-modifier-selected);
+}
+
+.vc-gif-vault-folderTabSelected > button:first-child {
+    color: var(--header-primary);
+}
+
+.vc-gif-vault-folderTabSelected .vc-gif-vault-folderCount {
+    color: var(--header-primary);
+}
+
+.vc-gif-vault-folderTab .vc-gif-vault-deleteFolder {
+    border-left: 1px solid var(--background-modifier-accent);
+}
+
+.vc-gif-vault-folderTab .vc-gif-vault-folderAction {
+    color: var(--interactive-normal);
+    font-size: 13px;
+    justify-content: center;
+    padding: 0 7px;
+}
+
+.vc-gif-vault-folderTab .vc-gif-vault-deleteFolder:hover,
+.vc-gif-vault-folderTab .vc-gif-vault-folderAction:hover {
+    color: var(--status-danger);
+}
+
+.vc-gif-vault-folderTab .vc-gif-vault-deleteFolder:disabled,
+.vc-gif-vault-folderTab .vc-gif-vault-folderAction:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.vc-gif-vault-renameInput {
+    min-width: 100px;
+    width: 120px;
+}
+
+.vc-gif-vault-gridScroller {
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    overflow-anchor: none;
+}
+
+.vc-gif-vault-gridScrollerInner {
+    height: 100%;
+    min-height: 0;
+    overflow-anchor: none;
+}
+
+.vc-gif-vault-gridContent,
+.vc-gif-vault-gridRow {
+    overflow-anchor: none;
+}
+
+.vc-gif-vault-gridRow {
+    box-sizing: border-box;
+    display: grid;
+    grid-auto-rows: minmax(0, 1fr);
+    gap: 12px;
+    height: var(--vc-gif-vault-row-height);
+    padding-bottom: 12px;
+}
+
+.vc-gif-vault-card {
+    box-sizing: border-box;
+    background: var(--background-tertiary);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: 8px;
+    transition:
+        border-color 120ms ease,
+        background 120ms ease;
+}
+
+.vc-gif-vault-card:hover {
+    background: var(--background-floating);
+}
+
+.vc-gif-vault-cardPreview {
+    background: var(--background-secondary);
+    border: 0;
+    border-radius: 5px;
+    cursor: pointer;
+    height: var(--vc-gif-vault-preview-height);
+    min-height: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
+.vc-gif-vault-cardPreview:hover,
+.vc-gif-vault-cardSelected {
+    outline: 2px solid var(--brand-500);
+    outline-offset: -2px;
+}
+
+.vc-gif-vault-cardTitleRow {
+    align-items: center;
+    display: flex;
+    gap: 4px;
+    min-width: 0;
+}
+
+.vc-gif-vault-cardTitle {
+    color: var(--header-primary);
+    flex: 1;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-gif-vault-cardAction {
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    color: var(--interactive-normal);
+    cursor: pointer;
+    flex: none;
+    font: inherit;
+    line-height: 20px;
+    padding: 0 4px;
+}
+
+.vc-gif-vault-cardAction:hover {
+    background: var(--background-modifier-hover);
+    color: var(--interactive-hover);
+}
+
+.vc-gif-vault-cardAction:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.vc-gif-vault-cardDelete:hover {
+    color: var(--status-danger);
+}
+
+.vc-gif-vault-titleInput {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+}
+
+.vc-gif-vault-folderSelectWrapper {
+    min-width: 0;
+    width: 100%;
+}
+
+.vc-gif-vault-folderSelect {
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    width: 100%;
+}
+
+.vc-gif-vault-folderSelect [class*="control"],
+.vc-gif-vault-folderSelect [class*="valueContainer"] {
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.vc-gif-vault-folderSelect [class*="placeholder"],
+.vc-gif-vault-folderSelect [class*="singleValue"] {
+    color: var(--text-normal);
+    display: block;
+    flex: 1 1 auto;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-gif-vault-folderOptionSelected {
+    color: var(--status-positive);
+    display: inline-block;
+    text-align: center;
+    width: 18px;
+}
+
+.vc-gif-vault-empty {
+    color: var(--text-muted);
+    margin: 12px 0;
+    text-align: center;
+}
+
+.vc-gif-vault-notice {
+    background: var(--background-modifier-accent);
+    border-left: 3px solid var(--status-danger);
+    border-radius: 4px;
+    color: var(--text-normal);
+    padding: 8px 12px;
+}
+
+.vc-gif-vault-backupSettings {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-gif-vault-backupActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@media (max-width: 700px) {
+    .vc-gif-vault {
+        height: min(52vh, 500px, calc(100vh - 220px));
+        min-height: min(280px, calc(100vh - 220px));
+    }
+
+    .vc-gif-vault.vc-gif-vault-maximized {
+        height: calc(95vh - 160px);
+        min-height: 0;
+    }
+
+    .vc-gif-vault-libraryHeading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .vc-gif-vault-libraryActions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .vc-gif-vault-createFolder {
+        flex-basis: auto;
+    }
+
+    .vc-gif-vault-randomPreview {
+        flex-direction: column;
+    }
+
+    .vc-gif-vault-preview,
+    .vc-gif-vault-previewPlaceholder {
+        flex-basis: auto;
+        width: 100%;
+    }
+
+    .vc-gif-vault-fullscreenPreview {
+        flex-basis: auto;
+        width: 100%;
+    }
+
+    .vc-gif-vault-maximized .vc-gif-vault-fullscreenPreview,
+    .vc-gif-vault-maximized .vc-gif-vault-previewPlaceholder {
+        flex-basis: auto;
+        height: clamp(200px, 30vh, 300px);
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .vc-gif-vault-libraryTools {
+        flex-wrap: wrap;
+    }
+
+    .vc-gif-vault-random {
+        flex: none;
+    }
+
+    .vc-gif-vault-actions {
+        flex-wrap: wrap;
+    }
+}

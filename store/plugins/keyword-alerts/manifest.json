@@ -1,0 +1,4 @@
+{ "id": "keyword-alerts", "name": "Keyword Alerts", "version": "1.0.0", "author": "MEPHEDRONE", "icon": "🔔",
+  "description": "Pops up a notification when someone says one of your words (your name, a game, a topic) in any chat.",
+  "category": "Notifications", "permissions": ["messages.read", "notify"],
+  "settings": { "keywords": { "type": "string", "label": "Words to watch (comma separated)", "default": "" } } }

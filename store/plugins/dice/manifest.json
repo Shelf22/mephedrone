@@ -1,0 +1,3 @@
+{ "id": "dice", "name": "Dice & Coin", "version": "1.0.0", "author": "MEPHEDRONE", "icon": "🎲",
+  "description": "/roll 2d6, /roll d20+3 and /flip. Results are posted in the chat so everyone sees them.",
+  "category": "Fun", "permissions": ["commands", "messages.send"] }

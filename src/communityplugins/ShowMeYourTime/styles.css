@@ -1,0 +1,13 @@
+.vc-syt-time {
+    color: var(--text-muted);
+    -webkit-text-fill-color: initial;
+    isolation: isolate;
+}
+
+.vc-syt-time::before {
+    content: "(";
+}
+
+.vc-syt-time::after {
+    content: ")";
+}

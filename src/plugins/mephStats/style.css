@@ -1,0 +1,125 @@
+.meph-stats {
+    color: var(--text-default, var(--text-normal));
+}
+
+.meph-stats-head {
+    margin: 22px 0 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.meph-stats-head:first-child {
+    margin-top: 0;
+}
+
+.meph-stats-head span {
+    margin-left: 6px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.meph-stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+}
+
+.meph-stat {
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--background-secondary, rgb(255 255 255 / 4%));
+    border: 1px solid rgb(255 255 255 / 6%);
+}
+
+.meph-stat-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--meph-accent, var(--text-default));
+    font-variant-numeric: tabular-nums;
+}
+
+.meph-stat-label {
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.meph-stat-sub {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    opacity: 0.8;
+}
+
+.meph-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 150px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--background-secondary, rgb(255 255 255 / 4%));
+}
+
+.meph-bar-col {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+}
+
+.meph-bar {
+    width: 100%;
+    min-height: 2px;
+    border-radius: 4px 4px 0 0;
+    background: var(--meph-accent, var(--brand-500));
+}
+
+.meph-bar-n,
+.meph-bar-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.meph-top {
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--background-secondary, rgb(255 255 255 / 4%));
+}
+
+.meph-top-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+}
+
+.meph-top-row + .meph-top-row {
+    border-top: 1px solid rgb(255 255 255 / 6%);
+}
+
+.meph-top-rank {
+    width: 18px;
+    font-weight: 800;
+    color: var(--meph-accent, var(--text-muted));
+}
+
+.meph-top-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.meph-top-n {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}

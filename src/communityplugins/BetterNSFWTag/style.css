@@ -1,0 +1,27 @@
+.channel-badge-main {
+    color: var(--status-danger-text);
+    font-family: var(--font-code);
+    padding: 0 4px;
+    border-radius: 4px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    line-height: 17px;
+    margin-left: 4px;
+}
+
+.badge-container-main {
+    display: flex;
+    gap: 0.1rem;
+    align-items: center;
+    margin-left: 0.2rem;
+    order: 2;
+}
+
+.misc-channel-badge-text, .misc-channel-badge-unknown, .misc-channel-badge-voice, .misc-channel-badge-stage{
+    display: none !important;
+}
+
+.misc-channel-badge-nsfw {
+    background-color: var(--status-danger-background);
+}

@@ -1,0 +1,4 @@
+{ "id": "compact-mode", "name": "Compact Mode", "version": "1.0.0", "author": "MEPHEDRONE", "icon": "🗜️",
+  "description": "Fits more on screen: tighter messages, smaller server icons and a slimmer channel list.",
+  "category": "Appearance", "permissions": ["style"],
+  "settings": { "strength": { "type": "select", "label": "How compact", "default": "medium", "options": [["light", "A little"], ["medium", "Medium"], ["max", "As tight as possible"]] } } }

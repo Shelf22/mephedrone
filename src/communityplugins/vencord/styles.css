@@ -1,0 +1,205 @@
+/*
+ * Built only from Discord's own theme variables, so client themes restyle
+ * the toasts like native popouts. Older variable names are kept as fallbacks.
+ */
+
+.vc-rn-host {
+    position: fixed;
+    inset: 0;
+    z-index: 1003;
+    pointer-events: none;
+}
+
+.vc-rn-stack {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 340px;
+    pointer-events: auto;
+
+    &.vc-rn-bottom-right {
+        right: 16px;
+        bottom: 16px;
+        flex-direction: column-reverse;
+    }
+
+    &.vc-rn-bottom-left {
+        left: 16px;
+        bottom: 16px;
+        flex-direction: column-reverse;
+    }
+
+    &.vc-rn-top-right {
+        right: 16px;
+        top: 40px;
+    }
+}
+
+.vc-rn-toast {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 10px 12px 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle, transparent);
+    border-radius: var(--radius-md, 8px);
+    background: var(--bg-overlay-floating, var(--background-surface-high, var(--background-floating)));
+    box-shadow: var(--shadow-high, var(--elevation-high));
+    color: var(--text-default, var(--text-normal));
+    font-family: var(--font-primary);
+    cursor: pointer;
+    animation: vc-rn-in 200ms cubic-bezier(.2, .8, .2, 1);
+
+    &:hover {
+        background: var(--bg-overlay-floating, var(--background-surface-higher, var(--background-floating)));
+        border-color: var(--border-strong, var(--background-modifier-accent));
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--focus-primary, var(--brand-500));
+        outline-offset: 2px;
+    }
+}
+
+.vc-rn-avatar {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--background-mod-subtle, var(--background-modifier-hover));
+}
+
+.vc-rn-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.vc-rn-headline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.vc-rn-who {
+    font-weight: 600;
+    color: var(--text-strong, var(--header-primary));
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.vc-rn-verb {
+    color: var(--text-muted);
+}
+
+.vc-rn-emojis {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.vc-rn-emoji {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.vc-rn-emoji-text {
+    width: auto;
+    font-size: 18px;
+    line-height: 20px;
+}
+
+.vc-rn-location {
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    color: var(--text-muted);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.vc-rn-preview {
+    margin-top: 6px;
+    padding-left: 8px;
+    border-left: 3px solid var(--border-strong, var(--background-modifier-accent));
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--text-default, var(--text-normal));
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+.vc-rn-close {
+    flex: none;
+    display: flex;
+    padding: 3px;
+    border: none;
+    border-radius: var(--radius-xs, 4px);
+    background: none;
+    color: var(--interactive-icon-default, var(--interactive-normal));
+    cursor: pointer;
+
+    &:hover {
+        background: var(--background-mod-subtle, var(--background-modifier-hover));
+        color: var(--interactive-icon-hover, var(--interactive-hover));
+    }
+}
+
+.vc-rn-progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--brand-500, var(--brand-experiment));
+    transition: width 100ms linear;
+
+    /* Paused until you're back in Discord */
+    &.vc-rn-waiting {
+        background: var(--text-muted);
+        opacity: .5;
+    }
+}
+
+.vc-rn-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.vc-rn-clear {
+    padding: 4px 8px;
+    border: none;
+    border-radius: var(--radius-xs, 4px);
+    background: var(--bg-overlay-floating, var(--background-floating));
+    box-shadow: var(--shadow-low, var(--elevation-low));
+    color: var(--text-default, var(--text-normal));
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+        color: var(--text-strong, var(--header-primary));
+    }
+}
+
+@keyframes vc-rn-in {
+    from {
+        opacity: 0;
+        transform: translateX(16px) scale(.98);
+    }
+}

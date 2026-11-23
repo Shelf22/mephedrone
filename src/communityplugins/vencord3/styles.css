@@ -1,0 +1,78 @@
+/* Built from Discord's theme variables, with older names as fallbacks. */
+
+.vc-hideaway-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.vc-hideaway-separator {
+    width: 32px;
+    height: 2px;
+    margin: 2px 0;
+    border-radius: 1px;
+    background: var(--border-subtle, var(--background-modifier-accent));
+}
+
+.vc-hideaway-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 4px;
+}
+
+.vc-hideaway-shake {
+    animation: vc-hideaway-shake 300ms ease-in-out;
+}
+
+.vc-hideaway-input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--input-border, var(--border-subtle, transparent));
+    border-radius: var(--radius-sm, 8px);
+    background: var(--input-background, var(--background-tertiary));
+    color: var(--text-default, var(--text-normal));
+    font-family: var(--font-primary);
+    font-size: 16px;
+    outline: none;
+
+    &::placeholder {
+        color: var(--text-muted);
+    }
+
+    &:focus {
+        border-color: var(--focus-primary, var(--brand-500));
+    }
+}
+
+.vc-hideaway-error {
+    color: var(--text-feedback-critical, var(--text-danger));
+    font-size: 14px;
+}
+
+.vc-hideaway-hint {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.vc-hideaway-setting {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+@keyframes vc-hideaway-shake {
+    20%, 60% {
+        transform: translateX(-6px);
+    }
+
+    40%, 80% {
+        transform: translateX(6px);
+    }
+}

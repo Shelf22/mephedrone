@@ -1,0 +1,107 @@
+/*
+ * Vencord userplugin — minimalCallBar
+ * Authors: kamaras
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { openUserProfile } from "@utils/discord";
+import { React, UserStore } from "@webpack/common";
+
+import { settings } from "../index";
+import { getSortedVoiceStates } from "../voiceParticipants";
+import { openVoiceUserContextMenu } from "./UserContextMenu";
+
+function formatDuration(ms: number): string {
+    const s = Math.floor(ms / 1000) % 60;
+    const m = Math.floor(ms / 60000) % 60;
+    const h = Math.floor(ms / 3600000);
+    if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+export interface CallTooltipProps {
+    channelId: string;
+    channelName: string;
+    callStartedAt: number;
+    position: "above" | "below";
+    anchorRect: DOMRect;
+    /** Called while a context menu opened from the tooltip is up, so the bar keeps it visible. */
+    onMenuOpenChange?: (open: boolean) => void;
+    /** Dismiss the tooltip (e.g. after opening a profile modal on top of it). */
+    onDismiss?: () => void;
+}
+
+export function CallTooltip({ channelId, channelName, callStartedAt, position, anchorRect, onMenuOpenChange, onDismiss }: CallTooltipProps) {
+    const [now, setNow] = React.useState(Date.now());
+
+    React.useEffect(() => {
+        const interval = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const participants = getSortedVoiceStates(channelId);
+
+    const style: React.CSSProperties = {
+        position: "fixed",
+        left: anchorRect.left,
+        zIndex: 1001,
+    };
+    if (position === "above") {
+        style.bottom = window.innerHeight - anchorRect.top + 4;
+    } else {
+        style.top = anchorRect.bottom + 4;
+    }
+
+    return (
+        <div
+            className={`vc-minimalCallBar-tooltip vc-minimalCallBar-tooltip-${position}`}
+            style={style}
+            onClick={e => e.stopPropagation()}
+        >
+            {settings.store.tooltipChannel && (
+                <div className="vc-minimalCallBar-tooltipHeader">{channelName}</div>
+            )}
+            {settings.store.tooltipDuration && (
+                <div className="vc-minimalCallBar-tooltipDuration">
+                    {formatDuration(now - callStartedAt)}
+                </div>
+            )}
+            {settings.store.tooltipUsers && participants.map(vs => {
+                let user: any;
+                try { user = UserStore.getUser(vs.userId); } catch { return null; }
+                if (!user) return null;
+
+                let statusText = "";
+                if (vs.selfStream) statusText = "Screen Sharing";
+                else if (vs.selfVideo) statusText = "Video";
+                else if (vs.selfDeaf || vs.deaf) statusText = "Deafened";
+                else if (vs.selfMute || vs.mute) statusText = "Muted";
+
+                return (
+                    <div
+                        key={vs.userId}
+                        className="vc-minimalCallBar-tooltipUser"
+                        onClick={() => { onDismiss?.(); openUserProfile(vs.userId); }}
+                        onContextMenu={e => {
+                            onMenuOpenChange?.(true);
+                            openVoiceUserContextMenu(e, vs.userId, () => onMenuOpenChange?.(false));
+                        }}
+                        title="Click for profile — right click for volume and mute"
+                    >
+                        <img
+                            className="vc-minimalCallBar-tooltipUserAvatar"
+                            src={user.getAvatarURL(undefined, 32)}
+                            alt=""
+                        />
+                        <span className="vc-minimalCallBar-tooltipUserName">
+                            {user.globalName ?? user.username}
+                        </span>
+                        {statusText && (
+                            <span className="vc-minimalCallBar-tooltipUserStatus">{statusText}</span>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+}

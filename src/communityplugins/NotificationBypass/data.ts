@@ -1,0 +1,87 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+import { settings } from ".";
+import { UserStore, PresenceStore } from "@webpack/common";
+
+export interface User {
+    id: string;
+    channel: string;
+    name: string;
+    customName: string;
+    activated: boolean;
+}
+
+export let currentUserBypassUsers: User[] = [];
+
+export async function init() {
+    const userId = UserStore.getCurrentUser()?.id;
+    if (userId == null) return;
+
+    currentUserBypassUsers = settings.store.userBasedBypassList[userId] ??= [];
+}
+
+export function shouldNotifyMessage(message: any, channelId: string) {
+    const currentUser = UserStore.getCurrentUser();
+    if (!currentUser) return false;
+
+    // DND check
+    const status = PresenceStore.getStatus(currentUser?.id);
+    if (status !== "dnd") return false;
+
+    // Don't notify if it's your own message
+    if (message.author?.id === currentUser?.id) return false;
+
+    // Check bypass and activated
+    return currentUser && isBypass(channelId) && isActived(channelId);
+}
+
+export function changeCustomName(id: string, newCustomName: string) {
+    let user = getUserById(id);
+    if (user != undefined) {
+        user.customName = newCustomName;
+    }
+}
+
+export function getUserByName(name: string) {
+    return currentUserBypassUsers.find((c) => c.name === name);
+}
+
+export function getUserById(id: string) {
+    return currentUserBypassUsers.find((c) => c.id === id);
+}
+
+export function addUser(user: User) {
+    currentUserBypassUsers.push(user);
+}
+
+export function removeUser(channelId: string) {
+    const userIndex = currentUserBypassUsers.findIndex((c) => c.channel === channelId);
+    if (userIndex === -1) return;
+
+    currentUserBypassUsers.splice(userIndex, 1);
+}
+
+export function bypassLen() {
+    return currentUserBypassUsers.length;
+}
+
+export function isBypass(channelId: string) {
+    return currentUserBypassUsers.some((c) => c.channel === channelId);
+}
+
+export function getAllUsers() {
+    return currentUserBypassUsers;
+}
+
+export function isActived(channelId: string) {
+    return currentUserBypassUsers.some((c) => c.channel === channelId && c.activated === true);
+}
+
+export function alterActivateUser(userId: string) {
+    const userIndex = currentUserBypassUsers.findIndex((c) => c.id === userId);
+    if (userIndex === -1) return;
+    currentUserBypassUsers[userIndex].activated = !currentUserBypassUsers[userIndex].activated;
+}

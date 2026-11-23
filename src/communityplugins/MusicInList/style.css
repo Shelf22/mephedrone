@@ -1,0 +1,14 @@
+/* Sits next to Discord's activity rows, which are flex items separated by a 4px gap */
+.vc-music-in-list-song {
+    display: flex;
+    flex: 0 1 auto;
+    align-items: center;
+    min-width: var(--custom-activity-status-icon-size);
+    margin-inline-start: 4px;
+}
+
+/* Only icons are shown: keep them as close as Discord does */
+.vc-music-in-list-song:first-child,
+.vc-music-in-list-icon-only {
+    margin-inline-start: 0;
+}

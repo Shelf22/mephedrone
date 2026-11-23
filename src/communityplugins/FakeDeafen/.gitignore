@@ -1,0 +1,15 @@
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+*.log
+*.tsbuildinfo
+
+node_modules/
+.env
+.env.*
+!.env.example
+
+.idea/
+.vscode/
+*.swp

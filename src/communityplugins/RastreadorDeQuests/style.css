@@ -1,0 +1,935 @@
+/* QuestTracker — panel styles (Discord theme variables with fallbacks) */
+
+.vc-qt-root {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: var(--text-default, var(--text-normal, #dbdee1));
+}
+
+.vc-qt-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vc-qt-tabs,
+.vc-qt-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.vc-qt-label {
+    min-width: 64px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-chip {
+    padding: 4px 12px;
+    border: 1px solid var(--border-subtle, rgb(255 255 255 / 8%));
+    border-radius: 999px;
+    background: var(--background-secondary, #2b2d31);
+    color: var(--text-default, var(--text-normal, #dbdee1));
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.vc-qt-chip:hover {
+    background: var(--background-modifier-hover, rgb(255 255 255 / 6%));
+}
+
+.vc-qt-chip-active {
+    border-color: var(--brand-500, #5865f2);
+    background: var(--brand-500, #5865f2);
+    color: #fff;
+}
+
+.vc-qt-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--background-secondary, #2b2d31);
+    font-size: 14px;
+}
+
+.vc-qt-summary > button {
+    margin-left: auto;
+}
+
+.vc-qt-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 10px;
+}
+
+.vc-qt-card {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border-subtle, rgb(255 255 255 / 8%));
+    border-left: 4px solid var(--qt-accent, var(--brand-500, #5865f2));
+    border-radius: 12px;
+    background: var(--background-secondary, #2b2d31);
+}
+
+.vc-qt-status-available { --qt-accent: #949ba4; }
+.vc-qt-status-inProgress { --qt-accent: #5865f2; }
+.vc-qt-status-completed { --qt-accent: #23a55a; }
+.vc-qt-status-claimed { --qt-accent: #f0b232; }
+
+.vc-qt-status-expired {
+    --qt-accent: #f23f43;
+
+    opacity: 0.6;
+}
+
+.vc-qt-thumb {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--background-tertiary, #1e1f22);
+    font-size: 28px;
+}
+
+.vc-qt-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vc-qt-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.vc-qt-row,
+.vc-qt-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.vc-qt-title {
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-qt-meta {
+    font-size: 12px;
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--qt-accent, #5865f2);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.vc-qt-badge-available { --qt-accent: #4e5058; }
+.vc-qt-badge-inProgress { --qt-accent: #5865f2; }
+.vc-qt-badge-completed { --qt-accent: #23a55a; }
+.vc-qt-badge-claimed { --qt-accent: #b8860b; }
+.vc-qt-badge-expired { --qt-accent: #f23f43; }
+
+.vc-qt-progress {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--background-tertiary, #1e1f22);
+}
+
+.vc-qt-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--qt-accent, #5865f2), #7b8cff);
+    transition: width 0.4s ease;
+}
+
+.vc-qt-reward {
+    font-size: 13px;
+}
+
+.vc-qt-hint {
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: var(--background-tertiary, #1e1f22);
+    font-size: 12px;
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-hint-claim {
+    background: rgb(35 165 90 / 15%);
+    color: #23a55a;
+    font-weight: 600;
+}
+
+.vc-qt-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.vc-qt-soon {
+    color: #f0b232;
+    font-weight: 600;
+}
+
+.vc-qt-claim {
+    color: #23a55a;
+    font-weight: 600;
+}
+
+.vc-qt-empty {
+    padding: 24px;
+    border-radius: 12px;
+    background: var(--background-secondary, #2b2d31);
+    text-align: center;
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-footer {
+    font-size: 12px;
+    text-align: center;
+    color: var(--text-muted, #949ba4);
+}
+
+/* ------------------------------------------------------------------ */
+/* Modo automático / automation                                        */
+/* ------------------------------------------------------------------ */
+
+.vc-qt-autobar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--border-subtle, rgb(255 255 255 / 8%));
+    border-left: 4px solid var(--background-modifier-accent, #4e5058);
+    border-radius: 12px;
+    background: var(--background-secondary, #2b2d31);
+}
+
+.vc-qt-autobar-running {
+    border-left-color: #23a55a;
+    background: linear-gradient(90deg, rgb(35 165 90 / 12%), var(--background-secondary, #2b2d31) 35%);
+}
+
+.vc-qt-autobar-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 180px;
+}
+
+.vc-qt-autobar-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.vc-qt-autostate {
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--background-tertiary, #1e1f22);
+    color: var(--text-muted, #949ba4);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.vc-qt-autostate-on {
+    background: rgb(35 165 90 / 18%);
+    color: #23a55a;
+}
+
+.vc-qt-autoentry {
+    border-left-color: var(--brand-500, #5865f2);
+}
+
+.vc-qt-autochip {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--background-tertiary, #1e1f22);
+    color: var(--text-muted, #949ba4);
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.vc-qt-autochip-working,
+.vc-qt-autochip-accepting {
+    background: rgb(88 101 242 / 18%);
+    color: #8b95ff;
+}
+
+.vc-qt-autochip-done,
+.vc-qt-autochip-claimed {
+    background: rgb(35 165 90 / 18%);
+    color: #23a55a;
+}
+
+.vc-qt-autochip-claiming {
+    background: rgb(240 178 50 / 18%);
+    color: #f0b232;
+}
+
+.vc-qt-autochip-failed {
+    background: rgb(242 63 67 / 18%);
+    color: #f23f43;
+}
+
+.vc-qt-autochip-blocked,
+.vc-qt-autochip-stopped {
+    background: rgb(148 155 164 / 18%);
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-auto-note {
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: var(--background-tertiary, #1e1f22);
+    font-size: 12px;
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-auto-note-error {
+    background: rgb(242 63 67 / 12%);
+    color: #f23f43;
+}
+
+.vc-qt-warnbox {
+    padding: 12px 14px;
+    border: 1px solid rgb(240 178 50 / 35%);
+    border-radius: 12px;
+    background: rgb(240 178 50 / 10%);
+    font-size: 13px;
+}
+
+.vc-qt-warnbox p {
+    margin: 6px 0 10px;
+    color: var(--text-default, var(--text-normal, #dbdee1));
+    line-height: 1.45;
+}
+
+.vc-qt-warnbox-title {
+    font-weight: 700;
+    color: #f0b232;
+}
+
+.vc-qt-auto-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-qt-log {
+    display: flex;
+    flex-direction: column;
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 8px;
+    border-radius: 10px;
+    background: var(--background-tertiary, #1e1f22);
+    font-family: var(--font-code, monospace);
+    font-size: 12px;
+}
+
+.vc-qt-logline {
+    display: flex;
+    gap: 8px;
+    padding: 2px 0;
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-logtime {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.vc-qt-log-info { color: var(--text-default, var(--text-normal, #dbdee1)); }
+.vc-qt-log-success { color: #23a55a; }
+.vc-qt-log-warn { color: #f0b232; }
+.vc-qt-log-error { color: #f23f43; }
+
+.vc-qt-consent ul {
+    margin: 0;
+    padding-left: 10px;
+    list-style: none;
+}
+
+.vc-qt-consent li {
+    padding: 6px 0;
+    line-height: 1.45;
+    list-style: none;
+}
+
+.vc-qt-consent-intro {
+    font-weight: 600;
+}
+
+.vc-qt-consent-actions {
+    display: flex;
+    gap: 8px;
+}
+
+
+/* ------------------------------------------------------------------ */
+/* Progreso en la página de Misiones / Quests page overlay              */
+/* ------------------------------------------------------------------ */
+
+#vc-qt-questpage {
+    position: fixed;
+    top: 72px;
+    right: 16px;
+    z-index: 1200;
+    width: 330px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 160px);
+    overflow: hidden auto;
+    pointer-events: none;
+}
+
+.vc-qt-overlay {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--border-subtle, rgb(255 255 255 / 8%));
+    border-radius: 14px;
+    background: var(--background-floating, #111214);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 45%);
+    color: var(--text-default, var(--text-normal, #dbdee1));
+    pointer-events: auto;
+}
+
+.vc-qt-overlay-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.vc-qt-overlay-title {
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-qt-overlay-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 4px;
+}
+
+.vc-qt-overlay-btn {
+    padding: 3px 10px;
+    border: 1px solid var(--border-subtle, rgb(255 255 255 / 10%));
+    border-radius: 999px;
+    background: var(--background-secondary, #2b2d31);
+    color: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.vc-qt-overlay-btn:hover {
+    background: var(--background-modifier-hover, rgb(255 255 255 / 8%));
+}
+
+.vc-qt-overlay-auto {
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgb(35 165 90 / 15%);
+    color: #23a55a;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.vc-qt-overlay-empty {
+    padding: 16px 8px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-overlay-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    border-radius: 10px;
+    background: var(--background-secondary, #2b2d31);
+}
+
+.vc-qt-overlay-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.vc-qt-overlay-name {
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-qt-overlay-status {
+    flex-shrink: 0;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--background-tertiary, #1e1f22);
+    color: var(--text-muted, #949ba4);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.vc-qt-overlay-status-completed {
+    background: rgb(35 165 90 / 18%);
+    color: #23a55a;
+}
+
+.vc-qt-overlay-status-inProgress {
+    background: rgb(88 101 242 / 18%);
+    color: #8b95ff;
+}
+
+.vc-qt-overlay-status-claimed {
+    background: rgb(240 178 50 / 18%);
+    color: #f0b232;
+}
+
+.vc-qt-overlay-bar {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--background-tertiary, #1e1f22);
+}
+
+.vc-qt-overlay-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #5865f2, #7b8cff);
+    transition: width 0.5s ease;
+}
+
+.vc-qt-overlay-fill-completed,
+.vc-qt-overlay-fill-claimed {
+    background: linear-gradient(90deg, #23a55a, #3ddc84);
+}
+
+.vc-qt-overlay-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-overlay-soon {
+    color: #f0b232;
+    font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ */
+/* Vídeo flotante de reserva / fallback floating video                */
+/* ------------------------------------------------------------------ */
+
+#vc-qt-pip-fallback {
+    position: fixed;
+    right: 20px;
+    bottom: 96px;
+    z-index: 1500;
+    width: 360px;
+    height: 203px;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 15%);
+    border-radius: 12px;
+    background: #000;
+    box-shadow: 0 10px 30px rgb(0 0 0 / 55%);
+}
+
+#vc-qt-pip-fallback video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+}
+
+.vc-qt-pip-idle {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    color: #dbdee1;
+    font-size: 12px;
+    text-align: center;
+}
+
+.vc-qt-pip-close {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    border: none;
+    background: rgb(0 0 0 / 55%);
+    color: #fff;
+    font-size: 16px;
+    line-height: 1;
+    border-radius: 999px;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+}
+
+/* Controles y modos del panel flotante / overlay controls and modes */
+
+.vc-qt-overlay {
+    width: 100%;
+}
+
+.vc-qt-overlay-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid var(--border-subtle, rgb(255 255 255 / 12%));
+    border-radius: 6px;
+    background: var(--background-secondary, #2b2d31);
+    color: inherit;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.vc-qt-overlay-icon:hover {
+    background: var(--background-modifier-hover, rgb(255 255 255 / 10%));
+}
+
+.vc-qt-overlay-summary {
+    font-size: 11px;
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-overlay-auto-off {
+    background: rgb(148 155 164 / 12%);
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-overlay-pct {
+    flex-shrink: 0;
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted, #949ba4);
+}
+
+.vc-qt-overlay-row {
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.vc-qt-overlay-row:hover {
+    background: var(--background-modifier-hover, rgb(255 255 255 / 7%));
+}
+
+.vc-qt-overlay-mode-wide .vc-qt-overlay-name {
+    font-size: 13px;
+}
+
+.vc-qt-overlay-mode-mini {
+    padding: 10px 12px;
+}
+
+.vc-qt-overlay-mini {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted, #949ba4);
+    text-align: right;
+}
+
+/* Cabecera compacta y controles del vídeo / compact header + video controls */
+
+.vc-qt-overlay-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-qt-overlay-actions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+}
+
+.vc-qt-overlay-mode-mini .vc-qt-overlay-head {
+    gap: 6px;
+}
+
+.vc-qt-overlay-mode-mini .vc-qt-overlay-title {
+    font-size: 13px;
+}
+
+.vc-qt-overlay-mode-mini .vc-qt-overlay-btn {
+    padding: 2px 8px;
+    font-size: 11px;
+}
+
+.vc-qt-overlay-mode-mini .vc-qt-overlay-auto,
+.vc-qt-overlay-mode-mini .vc-qt-overlay-mini {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-qt-pip-bar {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    z-index: 2;
+    display: flex;
+    gap: 6px;
+}
+
+.vc-qt-pip-btn {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 55%);
+    color: #fff;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.vc-qt-pip-btn:hover {
+    background: rgb(0 0 0 / 80%);
+}
+
+#vc-qt-pip-fallback {
+    position: fixed;
+}
+
+#vc-qt-pip-fallback video {
+    display: block;
+}
+
+/* Ajustes finos de la cabecera y del texto largo / final header + text polish */
+
+.vc-qt-overlay-auto {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-qt-overlay-meta {
+    min-width: 0;
+}
+
+.vc-qt-overlay-meta span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-qt-overlay-meta span:last-child {
+    flex-shrink: 0;
+}
+
+.vc-qt-overlay-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.vc-qt-overlay-mode-wide .vc-qt-overlay-row {
+    padding: 9px 10px;
+}
+
+.vc-qt-overlay-mode-wide .vc-qt-overlay-meta {
+    font-size: 12px;
+}
+
+/* Panel arrastrable / draggable overlay */
+
+.vc-qt-overlay-head {
+    cursor: grab;
+    user-select: none;
+}
+
+.vc-qt-dragging {
+    opacity: 0.96;
+}
+
+.vc-qt-dragging .vc-qt-overlay-head {
+    cursor: grabbing;
+}
+
+#vc-qt-questpage {
+    touch-action: none;
+}
+
+/* Redimensionar el panel / resize grip */
+
+.vc-qt-overlay {
+    position: relative;
+}
+
+.vc-qt-overlay-grip {
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 12px;
+    height: 12px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    border-radius: 2px;
+    opacity: 0.35;
+    cursor: nwse-resize;
+}
+
+.vc-qt-overlay-grip:hover {
+    opacity: 0.85;
+}
+
+.vc-qt-resizing {
+    user-select: none;
+}
+
+/* El contenedor no recorta; el scroll vive en el panel para que el asa quede visible */
+
+#vc-qt-questpage {
+    overflow: visible;
+}
+
+.vc-qt-overlay {
+    max-height: calc(100vh - 170px);
+    overflow-y: auto;
+}
+
+.vc-qt-overlay-grip {
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    pointer-events: auto;
+}
+
+/* Modo estrecho del panel: las filas se reacomodan en vez de recortarse */
+
+.vc-qt-overlay-narrow .vc-qt-overlay-top {
+    flex-wrap: wrap;
+    gap: 2px 6px;
+}
+
+.vc-qt-overlay-narrow .vc-qt-overlay-name {
+    flex: 1 1 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vc-qt-overlay-narrow .vc-qt-overlay-pct {
+    margin-left: 0;
+}
+
+.vc-qt-overlay-narrow .vc-qt-overlay-status {
+    margin-left: auto;
+}
+
+.vc-qt-overlay-narrow .vc-qt-overlay-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+}
+
+.vc-qt-overlay-narrow .vc-qt-overlay-meta span {
+    max-width: 100%;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+.vc-qt-overlay-narrow .vc-qt-overlay-summary {
+    font-size: 10px;
+}
+
+.vc-qt-overlay-narrow .vc-qt-overlay-title {
+    font-size: 12px;
+}
+
+.vc-qt-overlay-grip {
+    width: 14px;
+    height: 14px;
+    opacity: 0.55;
+}
+
+.vc-qt-overlay-grip:hover {
+    opacity: 1;
+}
+
+/* Etiqueta especial para Quests que solo se completan en el móvil */
+
+.vc-qt-overlay-status-mobile {
+    background: rgba(250, 166, 26, 0.18);
+    color: #faa61a;
+    border-color: rgba(250, 166, 26, 0.4);
+}
+
+/* Fluidez: no pintar lo que está fuera de pantalla y aislar el panel flotante */
+
+.vc-qt-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 150px;
+}
+
+.vc-qt-overlay-row {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 64px;
+}
+
+.vc-qt-overlay {
+    contain: layout paint;
+}

@@ -1,0 +1,75 @@
+.notif-manager-root {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.notif-manager-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.notif-manager-button-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.notif-manager-entries-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.notif-manager-entry-card {
+    background: var(--background-secondary);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.notif-manager-entry-type {
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.notif-manager-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.notif-manager-history-item {
+    background: var(--background-secondary);
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.notif-manager-history-title {
+    color: var(--text-strong);
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.notif-manager-history-timestamp {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.notif-manager-modal-content {
+    padding: 16px;
+}
+
+.vc-settings-modal-content {
+    contain: none !important;
+}

@@ -1,0 +1,3 @@
+{ "id": "text-tools", "name": "Text Tools", "version": "1.0.0", "author": "MEPHEDRONE", "icon": "🔤",
+  "description": "/mock tExT lIkE tHiS, /reverse, /clap 👏 between 👏 words, /tiny ˢᵐᵃˡˡ ᵗᵉˣᵗ and /wide ｗｉｄｅ text.",
+  "category": "Fun", "permissions": ["commands", "messages.send"] }

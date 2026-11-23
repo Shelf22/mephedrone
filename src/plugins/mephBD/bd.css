@@ -1,0 +1,49 @@
+.meph-bd { color: var(--text-default); }
+
+.meph-bd-optin {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--text-feedback-warning, #f0b232) 10%, var(--background-base-lower));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-feedback-warning, #f0b232) 35%, transparent);
+}
+
+.meph-bd-optin.on {
+    background: color-mix(in srgb, var(--meph-accent) 10%, var(--background-base-lower));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--meph-accent) 35%, transparent);
+}
+
+.meph-bd-optin-title { font-weight: 700; font-size: 15px; color: var(--text-strong); }
+.meph-bd-optin-text { margin-top: 4px; font-size: 13px; line-height: 1.45; color: var(--text-muted); }
+.meph-bd-optin .meph-st-btn { flex: none; }
+.meph-st-btn.off { background: var(--background-mod-strong); color: var(--text-strong); }
+
+.meph-bd-toolbar { display: flex; align-items: center; gap: 12px; margin: 16px 0 10px; }
+.meph-bd-toolbar .meph-st-search { flex: 1; }
+.meph-bd-count { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+
+.meph-bd-list { display: flex; flex-direction: column; gap: 8px; }
+
+.meph-bd-row {
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: var(--background-base-lower);
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+}
+
+.meph-bd-row-main { display: flex; align-items: center; gap: 10px; }
+.meph-bd-meta { flex: 1; min-width: 0; }
+.meph-bd-name { font-weight: 700; color: var(--text-strong); }
+.meph-bd-desc { margin-top: 2px; font-size: 13px; line-height: 1.4; color: var(--text-default); }
+.meph-bd-by { margin-top: 4px; font-size: 11.5px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meph-bd-empty { padding: 10px 0 0; font-size: 13px; color: var(--text-muted); }
+.meph-bd-panel { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+.meph-chip:disabled { opacity: .45; cursor: not-allowed; }
+
+.meph-bd-settings { display: flex; flex-direction: column; gap: 10px; }
+.meph-bd-setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.meph-bd-setting span { display: flex; flex-direction: column; }
+.meph-bd-setting small { color: var(--text-muted); font-size: 12px; }
+.meph-bd-settings details summary { cursor: pointer; font-weight: 700; color: var(--text-strong); margin-bottom: 8px; }

@@ -1,0 +1,2 @@
+tests/*.bundle.cjs
+node_modules/

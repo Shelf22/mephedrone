@@ -1,0 +1,642 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 sioaeko and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import "./styles.css";
+
+import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { classNameFactory } from "@utils/css";
+import { isObject, sleep } from "@utils/misc";
+import definePlugin, { PluginNative } from "@utils/types";
+import { chooseFile, saveFile } from "@utils/web";
+import { Message } from "@vencord/discord-types";
+import { CloudUploadPlatform } from "@vencord/discord-types/enums";
+import { CloudUploader, Constants, MessageStore, React, RestAPI, SelectedChannelStore, SnowflakeUtils, Toasts } from "@webpack/common";
+
+import { ChunkData, ChunkEntry, ChunkMeta, MergedResult } from "./types";
+
+const cl = classNameFactory("vc-file-splitter-");
+
+const Native = IS_DISCORD_DESKTOP
+    ? VencordNative.pluginHelpers.FileSplitter as PluginNative<typeof import("./native")>
+    : null;
+
+const CHUNK_SIZE = 10 * 1024 * 1024;
+const MAX_FILE_SIZE = 500 * 1024 * 1024;
+const CHUNK_TIMEOUT = 30 * 60 * 1000;
+const SCAN_DELAY = 1500;
+const PRUNE_INTERVAL = 60 * 1000;
+const MAX_PARALLEL_DOWNLOADS = 4;
+const MAX_CHUNKS = Math.ceil(MAX_FILE_SIZE / CHUNK_SIZE);
+const MAX_STORED_MESSAGES = 200;
+const CHUNK_UPLOADS_PER_WINDOW = 4;
+const CHUNK_UPLOAD_WINDOW = 5500;
+
+const IMAGE_MIME: Record<string, string> = {
+    avif: "image/avif", bmp: "image/bmp", gif: "image/gif",
+    jpeg: "image/jpeg", jpg: "image/jpeg", png: "image/png", webp: "image/webp"
+};
+
+const chunkStore: Record<string, ChunkEntry> = {};
+const mergedResults = new Map<string, MergedResult>();
+const storeListeners = new Set<() => void>();
+
+function emitChange() {
+    for (const listener of storeListeners) listener();
+}
+
+function useStore() {
+    const [, setVersion] = React.useState(0);
+    React.useEffect(() => {
+        const listener = () => setVersion(v => v + 1);
+        storeListeners.add(listener);
+        return () => {
+            storeListeners.delete(listener);
+        };
+    }, []);
+}
+
+function chunkKey(c: Pick<ChunkData, "channelId" | "originalName" | "originalSize" | "timestamp">) {
+    return `${c.channelId}_${c.originalName}_${c.originalSize}_${c.timestamp}`;
+}
+
+function mimeType(filename: string) {
+    const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+    return IMAGE_MIME[ext] ?? null;
+}
+
+function isImage(filename: string) {
+    return mimeType(filename)?.startsWith("image/") ?? false;
+}
+
+function normalizeUrl(url: string | null | undefined): string | null {
+    if (!url || url.length > 2048) return null;
+    try {
+        const u = new URL(url);
+        if (
+            u.protocol !== "https:"
+            || u.username || u.password
+            || (u.port && u.port !== "443")
+            || !["cdn.discordapp.com", "media.discordapp.net"].includes(u.hostname)
+            || !u.pathname.startsWith("/attachments/")
+        ) return null;
+        if (u.hostname === "media.discordapp.net") u.hostname = "cdn.discordapp.com";
+        return u.toString();
+    } catch {
+        return null;
+    }
+}
+
+function isComplete(entry: ChunkEntry) {
+    if (!entry.chunks.length) return false;
+    const { total } = entry.chunks[0];
+    const indices = new Set(entry.chunks.map(c => c.index));
+    if (indices.size !== total) return false;
+    for (let i = 0; i < total; i++) if (!indices.has(i)) return false;
+    return true;
+}
+
+function parseChunkMeta(content: string | undefined): Omit<ChunkMeta, "type"> | null {
+    if (!content) return null;
+    let c: unknown;
+    try {
+        c = JSON.parse(content);
+    } catch {
+        return null;
+    }
+    if (!isObject(c)) return null;
+
+    const { type, index, total, originalName, originalSize, timestamp } = c as Record<string, unknown>;
+    if (
+        type !== "FileSplitterChunk"
+        || typeof index !== "number" || !Number.isSafeInteger(index) || index < 0
+        || typeof total !== "number" || !Number.isSafeInteger(total) || total <= 0 || total > MAX_CHUNKS || index >= total
+        || typeof originalName !== "string" || originalName.length === 0 || originalName.length > 255
+        || typeof originalSize !== "number" || !Number.isFinite(originalSize) || originalSize <= 0 || originalSize > MAX_FILE_SIZE
+        || typeof timestamp !== "number" || !Number.isFinite(timestamp) || timestamp <= 0
+    ) return null;
+
+    return { index, total, originalName, originalSize, timestamp };
+}
+
+function getChunkFromMessage(message: Message): ChunkData | null {
+    if (!message.attachments?.length) return null;
+    const meta = parseChunkMeta(message.content);
+    if (!meta) return null;
+    const url = normalizeUrl(message.attachments[0].url ?? message.attachments[0].proxy_url);
+    if (!url) return null;
+    return { ...meta, type: "FileSplitterChunk", url, channelId: message.channel_id, messageId: message.id };
+}
+
+function anchorMessageId(key: string): string | null {
+    return chunkStore[key]?.chunks[0]?.messageId ?? null;
+}
+
+async function fetchBlob(url: string, filename?: string): Promise<Blob> {
+    const normalized = normalizeUrl(url);
+    if (!normalized) throw new Error("Unsupported attachment URL");
+
+    if (Native) {
+        const res = await Native.fetchChunk(normalized);
+        if (!res.success || !res.data) throw new Error(res.error ?? "Chunk download failed");
+        return new Blob([res.data], { type: res.contentType ?? (filename ? mimeType(filename) : null) ?? "application/octet-stream" });
+    }
+
+    return fetchBrowserBlob(normalized);
+}
+
+async function fetchBrowserBlob(url: string): Promise<Blob> {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const contentLength = Number(r.headers.get("content-length"));
+    if (Number.isFinite(contentLength) && contentLength > CHUNK_SIZE) throw new Error("Chunk exceeds the 10MB limit");
+    const blob = await r.blob();
+    if (blob.size > CHUNK_SIZE) throw new Error("Chunk exceeds the 10MB limit");
+    return blob;
+}
+
+async function fetchChunkParts(chunks: ChunkData[], filename: string): Promise<Blob[]> {
+    const parts: Blob[] = [];
+    for (let i = 0; i < chunks.length; i += MAX_PARALLEL_DOWNLOADS) {
+        parts.push(...await Promise.all(chunks.slice(i, i + MAX_PARALLEL_DOWNLOADS).map(chunk => fetchBlob(chunk.url, filename))));
+    }
+    return parts;
+}
+
+async function assembleBlob(key: string): Promise<{ blob: Blob; mimeType: string; }> {
+    const entry = chunkStore[key];
+    if (!entry?.chunks.length) throw new Error("No chunks available");
+
+    const name = entry.chunks[0].originalName;
+    const parts = await fetchChunkParts(entry.chunks, name);
+    const mime = mimeType(name) ?? "application/octet-stream";
+    const blob = new Blob(parts, { type: mime });
+    if (blob.size !== entry.chunks[0].originalSize) throw new Error("Merged file size does not match its metadata");
+    return { blob, mimeType: mime };
+}
+
+function downloadBlob(blob: Blob, filename: string) {
+    saveFile(new File([blob], filename, { type: blob.type ?? "application/octet-stream" }));
+}
+
+async function handleDownload(key: string) {
+    const result = mergedResults.get(key);
+    if (!result) return;
+
+    try {
+        if (!result.blob) {
+            result.status = "loading";
+            result.error = undefined;
+            emitChange();
+            const assembled = await assembleBlob(key);
+            result.blob = assembled.blob;
+            result.mimeType = assembled.mimeType;
+            result.status = "ready";
+        }
+        downloadBlob(result.blob, result.originalName);
+    } catch (e) {
+        result.status = "error";
+        result.error = e instanceof Error ? e.message : String(e);
+        emitChange();
+        Toasts.show({ message: `Download failed: ${result.error}`, id: Toasts.genId(), type: Toasts.Type.FAILURE });
+        return;
+    }
+
+    emitChange();
+    Toasts.show({ message: `Downloaded: ${result.originalName}`, id: Toasts.genId(), type: Toasts.Type.SUCCESS });
+}
+
+function storeChunk(chunk: ChunkData) {
+    const key = chunkKey(chunk);
+    const entry = chunkStore[key] ?? (chunkStore[key] = { chunks: [], lastUpdated: Date.now() });
+    if (entry.chunks.length && entry.chunks[0].total !== chunk.total) return null;
+    const existing = entry.chunks.find(c => c.index === chunk.index);
+
+    let changed = false;
+    if (!existing) {
+        entry.chunks.push(chunk);
+        changed = true;
+    } else if (existing.url !== chunk.url || existing.messageId !== chunk.messageId) {
+        Object.assign(existing, chunk);
+        changed = true;
+    }
+
+    entry.chunks.sort((a, b) => a.index - b.index);
+    entry.lastUpdated = Date.now();
+    if (changed) emitChange();
+    return key;
+}
+
+async function prepareImagePreview(key: string) {
+    const result = mergedResults.get(key);
+    if (!result || result.objectUrl || result.status === "loading") return;
+
+    result.status = "loading";
+    emitChange();
+
+    try {
+        const { blob, mimeType: mime } = await assembleBlob(key);
+        if (result.objectUrl) URL.revokeObjectURL(result.objectUrl);
+        result.blob = blob;
+        result.mimeType = mime;
+        result.objectUrl = URL.createObjectURL(blob);
+        result.status = "ready";
+    } catch (e) {
+        result.status = "error";
+        result.error = e instanceof Error ? e.message : String(e);
+    }
+
+    emitChange();
+}
+
+function processComplete(key: string) {
+    const entry = chunkStore[key];
+    if (!entry) return;
+
+    const name = entry.chunks[0].originalName;
+    if (!mergedResults.has(key)) {
+        mergedResults.set(key, {
+            key,
+            originalName: name,
+            isImage: isImage(name),
+            mimeType: mimeType(name) ?? "application/octet-stream",
+            status: "pending"
+        });
+        emitChange();
+    }
+
+    if (isImage(name)) void prepareImagePreview(key);
+}
+
+function processMessage(message: Message) {
+    if (message.channel_id !== SelectedChannelStore.getChannelId()) return;
+    const chunk = getChunkFromMessage(message);
+    if (!chunk) return;
+    const key = storeChunk(chunk);
+    if (!key) return;
+    if (isComplete(chunkStore[key])) processComplete(key);
+}
+
+function scanChannel(channelId: string) {
+    if (channelId !== SelectedChannelStore.getChannelId()) return;
+    const messages = MessageStore.getMessages(channelId);
+    if (!messages) return;
+    for (const msg of messages.toArray().slice(-MAX_STORED_MESSAGES)) processMessage(msg);
+}
+
+function clearAll() {
+    for (const r of mergedResults.values()) if (r.objectUrl) URL.revokeObjectURL(r.objectUrl);
+    for (const k of Object.keys(chunkStore)) delete chunkStore[k];
+    mergedResults.clear();
+    emitChange();
+}
+
+function pruneOldChunks() {
+    const now = Date.now();
+    let changed = false;
+    for (const key of Object.keys(chunkStore)) {
+        if (now - chunkStore[key].lastUpdated <= CHUNK_TIMEOUT) continue;
+
+        const result = mergedResults.get(key);
+        if (result?.objectUrl) URL.revokeObjectURL(result.objectUrl);
+        mergedResults.delete(key);
+        delete chunkStore[key];
+        changed = true;
+    }
+    if (changed) emitChange();
+}
+
+function uploadChunk(channelId: string, file: File, meta: ChunkMeta): Promise<void> {
+    return new Promise((resolve, reject) => {
+        try {
+            const uploader = new CloudUploader({ file, platform: CloudUploadPlatform.WEB }, channelId);
+            uploader.on("complete", () => {
+                RestAPI.post({
+                    url: Constants.Endpoints.MESSAGES(channelId),
+                    body: {
+                        flags: 0,
+                        channel_id: channelId,
+                        content: JSON.stringify(meta),
+                        nonce: SnowflakeUtils.fromTimestamp(Date.now()),
+                        sticker_ids: [],
+                        type: 0,
+                        attachments: [{ id: "0", filename: uploader.filename, uploaded_filename: uploader.uploadedFilename }]
+                    }
+                }).then(() => resolve()).catch((e: unknown) => reject(new Error(`Send failed: ${e instanceof Error ? e.message : String(e)}`)));
+            });
+            uploader.on("error", (e: unknown) => reject(new Error(`Upload failed: ${e instanceof Error ? e.message : String(e)}`)));
+            uploader.upload();
+        } catch (e) {
+            reject(new Error(e instanceof Error ? e.message : String(e)));
+        }
+    });
+}
+
+function shouldPauseForUploadWindow(index: number, total: number) {
+    return index + 1 < total && (index + 1) % CHUNK_UPLOADS_PER_WINDOW === 0;
+}
+
+const SplitIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M14 2H6C4.9 2 4 2.9 4 4v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6zm8-4h-4v-2h4v-2l3 3-3 3v-2z" />
+    </svg>
+);
+
+const FILE_BADGE_KINDS: Array<[string[], string]> = [
+    [["zip", "rar", "7z", "tar", "gz"], "archive"],
+    [["pdf"], "document"],
+    [["txt", "md", "json", "csv", "xml", "yaml", "yml"], "text"],
+    [["mp3", "wav", "flac", "ogg", "m4a"], "audio"],
+    [["mp4", "mkv", "avi", "mov", "webm"], "video"],
+    [["exe", "msi", "apk"], "app"],
+];
+
+function getFileBadge(filename: string) {
+    const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+    const kind = FILE_BADGE_KINDS.find(([exts]) => exts.includes(ext))?.[1] ?? "file";
+    const label = ext.toUpperCase().slice(0, 4);
+    return { kind, label: label.length ? label : "FILE" };
+}
+
+const FILE_ICON_PATHS: Record<string, string[]> = {
+    archive: ["M10 10v8", "M12 10v8", "M10 12h2", "M10 15h2", "M10 18h2"],
+    video: ["M10 10.5v5l4-2.5z"],
+    audio: ["M10 10v6", "M14 9v5", "M10 16a1.5 1.5 0 1 1-1.5 1.5", "M14 14a1.5 1.5 0 1 1-1.5 1.5"],
+    text: ["M9 11h6", "M9 14h6", "M9 17h4"],
+    document: ["M9 11h6", "M9 15h6"],
+    app: ["M9 10h6v6H9z"],
+    file: ["M9 11h6", "M9 15h6", "M9 19h4"],
+};
+
+const FileTypeIcon = ({ kind, label }: { kind: string; label: string; }) => (
+    <div className={cl("file-icon")} title={label}>
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
+            <path d="M14 2v5h5" />
+            {(FILE_ICON_PATHS[kind] ?? FILE_ICON_PATHS.file).map(d => <path key={d} d={d} />)}
+        </svg>
+    </div>
+);
+
+const ActionButton = ({ children, disabled, onClick }: { children: React.ReactNode; disabled?: boolean; onClick: () => void; }) => (
+    <button
+        className={cl("action")}
+        type="button"
+        disabled={disabled}
+        onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClick();
+        }}
+    >
+        {children}
+    </button>
+);
+
+function ProgressCard({ entry }: { entry: ChunkEntry; }) {
+    const first = entry.chunks[0];
+    const count = new Set(entry.chunks.map(c => c.index)).size;
+    return (
+        <div className={cl("card")} data-status="pending">
+            <div className={cl("body")}>
+                <div className={cl("text")}>
+                    <div className={cl("title")}>{first?.originalName ?? "Split file"}</div>
+                    <div className={cl("subtitle")}>Waiting for chunks: {count}/{first?.total ?? 0}</div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function MergedResultCard({ result }: { result: MergedResult; }) {
+    const badge = getFileBadge(result.originalName);
+    const subtitle = result.error
+        ? `Merge failed: ${result.error}`
+        : result.isImage
+            ? result.status === "ready" ? "Merged image preview" : "Preparing image preview..."
+            : result.status === "loading" ? "Preparing download..." : "Merged file ready to download";
+
+    return (
+        <div className={cl("card")} data-status={result.status} data-image={String(result.isImage)}>
+            {result.isImage && result.objectUrl && (
+                <img className={cl("image")} src={result.objectUrl} alt={result.originalName} />
+            )}
+            <div className={cl("body")}>
+                {!result.isImage && <FileTypeIcon kind={badge.kind} label={badge.label} />}
+                <div className={cl("text")}>
+                    <div className={cl("title")}>{result.originalName}</div>
+                    <div className={cl("subtitle")}>{subtitle}</div>
+                </div>
+                <div className={cl("actions")}>
+                    {result.status === "error" ? (
+                        <ActionButton onClick={() => {
+                            if (result.isImage) void prepareImagePreview(result.key);
+                            else void handleDownload(result.key);
+                        }}>
+                            Retry
+                        </ActionButton>
+                    ) : (
+                        <ActionButton disabled={result.status === "loading" && !result.blob} onClick={() => void handleDownload(result.key)}>
+                            Download
+                        </ActionButton>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function FileSplitterAccessory({ message }: { message: Message; }) {
+    useStore();
+
+    React.useEffect(() => {
+        processMessage(message);
+    }, [message.id, message.content, message.attachments.length]);
+
+    const chunk = getChunkFromMessage(message);
+    const key = chunk ? chunkKey(chunk) : null;
+    const entry = key ? chunkStore[key] : null;
+    const complete = Boolean(entry && isComplete(entry));
+    const result = key ? mergedResults.get(key) : null;
+
+    if (!chunk || !key || !entry || anchorMessageId(key) !== message.id) return null;
+    if (!complete) return <ProgressCard entry={entry} />;
+    if (!result) return null;
+    return <MergedResultCard result={result} />;
+}
+
+const SafeFileSplitterAccessory = ErrorBoundary.wrap(FileSplitterAccessory, { noop: true });
+
+const SplitButton: ChatBarButtonFactory = ({ isMainChat, channel }) => {
+    const [status, setStatus] = React.useState<string | null>(null);
+
+    async function doUpload() {
+        const file = await chooseFile("*/*");
+        if (!file) return;
+
+        if (file.size > MAX_FILE_SIZE) {
+            Toasts.show({ message: "File exceeds 500MB limit.", id: Toasts.genId(), type: Toasts.Type.FAILURE });
+            return;
+        }
+        if (file.size <= CHUNK_SIZE) {
+            Toasts.show({ message: "File is small enough to send directly.", id: Toasts.genId(), type: Toasts.Type.MESSAGE });
+            return;
+        }
+
+        const channelId = channel.id;
+        if (!channelId) {
+            Toasts.show({ message: "No channel selected.", id: Toasts.genId(), type: Toasts.Type.FAILURE });
+            return;
+        }
+
+        const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+        Toasts.show({ message: `Splitting ${file.name} into ${totalChunks} chunks...`, id: Toasts.genId(), type: Toasts.Type.MESSAGE });
+        setStatus("0%");
+
+        try {
+            const timestamp = Date.now();
+            for (let i = 0; i < totalChunks; i++) {
+                const start = i * CHUNK_SIZE;
+                const chunkFile = new File(
+                    [file.slice(start, start + CHUNK_SIZE)],
+                    `${file.name}.part${String(i + 1).padStart(3, "0")}`,
+                    { type: "application/octet-stream" }
+                );
+                await uploadChunk(channelId, chunkFile, {
+                    type: "FileSplitterChunk",
+                    index: i, total: totalChunks,
+                    originalName: file.name, originalSize: file.size,
+                    timestamp
+                });
+                setStatus(`${Math.round(((i + 1) / totalChunks) * 100)}%`);
+                if (shouldPauseForUploadWindow(i, totalChunks)) {
+                    setStatus(`${Math.round(((i + 1) / totalChunks) * 100)}% (rate limit pause)`);
+                    await sleep(CHUNK_UPLOAD_WINDOW);
+                }
+            }
+            Toasts.show({ message: `Uploaded ${totalChunks} parts for ${file.name}`, id: Toasts.genId(), type: Toasts.Type.SUCCESS });
+        } catch (e) {
+            Toasts.show({ message: `Error: ${e instanceof Error ? e.message : String(e)}`, id: Toasts.genId(), type: Toasts.Type.FAILURE });
+        } finally {
+            setStatus(null);
+        }
+    }
+
+    if (!isMainChat) return null;
+
+    const handleClick = () => {
+        if (!status) void doUpload();
+    };
+
+    return (
+        <ChatBarButton tooltip={status ? `Uploading ${status}` : "Split & Upload"} onClick={handleClick}>
+            <SplitIcon />
+        </ChatBarButton>
+    );
+};
+
+let delayedScan: ReturnType<typeof setTimeout> | undefined;
+let cleanupInterval: ReturnType<typeof setInterval> | undefined;
+
+export default definePlugin({
+    name: "FileSplitter",
+    description: "Splits large files into attachment-sized chunks and rebuilds them in chat.",
+    tags: ["Chat", "Utility"],
+    authors: [
+        {
+            id: 1505110745258397849n,
+            name: "sioaeko"
+        }
+    ],
+    dependencies: ["ChatInputButtonAPI", "MessageAccessoriesAPI"],
+
+    chatBarButton: {
+        icon: SplitIcon,
+        render: SplitButton
+    },
+
+    patches: [
+        {
+            find: '.CUSTOM_GIFT?""',
+            replacement: [
+                {
+                    match: /message:(\i),message:\{id:\i\}.{0,200}?renderContentOnly:\i\}=\i;/,
+                    replace: "$&if($self.shouldHideChunkMessage($1)) return null;"
+                },
+                {
+                    match: /childrenMessageContent:(\i),/g,
+                    replace: "childrenMessageContent:$self.isChunkMessage(arguments[0].message)?null:$1,"
+                },
+            ]
+        },
+        {
+            find: "}renderStickersAccessories(",
+            replacement: {
+                match: /(?<=\i=)this\.render(?:Attachments|Embeds|StickersAccessories|ComponentAccessories)\((\i)\)/g,
+                replace: "$self.isChunkMessage($1)?null:$&"
+            }
+        }
+    ],
+
+    renderMessageAccessory({ message }) {
+        return <SafeFileSplitterAccessory message={message} />;
+    },
+
+    isChunkMessage(message?: Message | null) {
+        return Boolean(message && getChunkFromMessage(message));
+    },
+
+    shouldHideChunkMessage(message?: Message | null) {
+        if (!message) return false;
+        const chunk = getChunkFromMessage(message);
+        if (!chunk) return false;
+        const key = chunkKey(chunk);
+        const entry = chunkStore[key];
+        if (!entry || !isComplete(entry)) return false;
+        const anchorId = anchorMessageId(key);
+        return Boolean(anchorId && anchorId !== message.id);
+    },
+
+    flux: {
+        MESSAGE_CREATE({ message }) {
+            processMessage(message);
+        },
+        MESSAGE_UPDATE({ message }) {
+            processMessage(message);
+        },
+        LOAD_MESSAGES_SUCCESS({ channelId }) {
+            if (channelId === SelectedChannelStore.getChannelId()) scanChannel(channelId);
+        },
+        CHANNEL_SELECT({ channelId }) {
+            if (!channelId) return;
+            clearAll();
+            clearTimeout(delayedScan);
+            delayedScan = setTimeout(() => {
+                if (channelId === SelectedChannelStore.getChannelId()) scanChannel(channelId);
+            }, SCAN_DELAY);
+        }
+    },
+
+    start() {
+        clearAll();
+        const ch = SelectedChannelStore.getChannelId();
+        if (ch) {
+            scanChannel(ch);
+            delayedScan = setTimeout(() => {
+                if (ch === SelectedChannelStore.getChannelId()) scanChannel(ch);
+            }, SCAN_DELAY);
+        }
+        cleanupInterval = setInterval(pruneOldChunks, PRUNE_INTERVAL);
+    },
+
+    stop() {
+        clearTimeout(delayedScan);
+        clearInterval(cleanupInterval);
+        delayedScan = cleanupInterval = undefined;
+        clearAll();
+        storeListeners.clear();
+    }
+});

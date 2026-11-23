@@ -1,0 +1,106 @@
+.vc-game-activity-box {
+    width: 100%;
+    margin: 0 0 4px 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    min-height: 52px;
+    background: linear-gradient(
+        135deg,
+        rgba(var(--game-color, 88, 101, 242), 0.45) 0%,
+        rgba(var(--game-color, 88, 101, 242), 0.15) 55%,
+        var(--background-secondary-alt, #1e1f22) 100%
+    );
+    border: 1px solid rgba(var(--game-color, 255, 255, 255), 0.3);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.vc-game-activity-box-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    flex: 1;
+}
+
+.vc-game-activity-box-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background-color: rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.vc-game-activity-box-icon-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--interactive-normal, #949ba4);
+}
+
+.vc-game-activity-box-details {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+    justify-content: center;
+}
+
+.vc-game-activity-box-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--header-primary, #f2f3f5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 16px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.vc-game-activity-box-status {
+    font-size: 11px;
+    color: var(--header-secondary, #949ba4);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 14px;
+    margin-top: 1px;
+}
+
+.vc-game-activity-box-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.vc-game-activity-box-stream-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: var(--interactive-normal, #949ba4);
+    padding: 0;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.vc-game-activity-box-stream-btn:hover {
+    background-color: var(--background-modifier-hover, rgba(78, 80, 88, 0.16));
+    color: var(--interactive-hover, #dbdee1);
+}

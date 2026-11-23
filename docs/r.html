@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<title>[MEPHEDRONE] Reader</title>
+<meta name="description" content="Read and reply to [MEPHEDRONE] encrypted Discord messages. Decryption happens in your browser.">
+<style>
+  :root {
+    --bg: #0b0b0e; --panel: #131318; --panel2: #1a1a21; --line: rgb(255 255 255 / 9%);
+    --text: #e9eaf0; --muted: #9a9cab; --accent: #9fe8ff; --ok: #5ee39a; --bad: #ff6b7a;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) { --bg: #f4f5f8; --panel: #fff; --panel2: #eef0f4; --line: rgb(0 0 0 / 9%); --text: #15161b; --muted: #5d6070; --accent: #0a7ea4; --ok: #1a8f52; --bad: #c42b3c; color-scheme: light; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 620px; margin: 0 auto; padding: 32px 16px 48px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+  header svg { width: 40px; height: 40px; flex: none; }
+  h1 { margin: 0; font: 800 19px/1.2 ui-monospace, "JetBrains Mono", monospace; letter-spacing: 2px; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 0 0 6px; }
+  input[type=password], input[type=text], textarea {
+    width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel2);
+    color: var(--text); font: inherit; outline: none;
+  }
+  input:focus, textarea:focus { border-color: var(--accent); }
+  textarea { min-height: 90px; resize: vertical; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+  button {
+    padding: 10px 18px; border: 0; border-radius: 10px; background: var(--accent); color: #05161c;
+    font: 700 14px/1 inherit; cursor: pointer;
+  }
+  button.ghost { background: var(--panel2); color: var(--text); border: 1px solid var(--line); }
+  button:disabled { opacity: .5; cursor: default; }
+  .check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); margin: 0; }
+  .msg { white-space: pre-wrap; word-break: break-word; font-size: 16px; padding: 14px 16px; border-radius: 12px; background: var(--panel2); border-left: 3px solid var(--ok); }
+  .status { font-size: 13px; margin-top: 10px; min-height: 18px; }
+  .status.bad { color: var(--bad); } .status.ok { color: var(--ok); }
+  .out { font-family: ui-monospace, monospace; font-size: 12px; word-break: break-all; }
+  .note { color: var(--muted); font-size: 12.5px; }
+  .note b { color: var(--text); }
+  h2 { font-size: 14px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <svg viewBox="0 0 128 128" aria-hidden="true"><rect width="128" height="128" rx="28" fill="#0a0a0d"/><path d="M30 26h-10v76h10M98 26h10v76H98" fill="none" stroke="#e9f6ff" stroke-width="7"/><path d="M38 92V38l26 30 26-30v54" fill="none" stroke="#9fe8ff" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/></svg>
+    <div>
+      <h1>[MEPHEDRONE]</h1>
+      <p>Encrypted message reader</p>
+    </div>
+  </header>
+
+  <section class="card" id="pasteCard" hidden>
+    <h2>Paste a message</h2>
+    <label for="paste">Copy the whole encrypted message (or its link) from Discord and paste it here</label>
+    <textarea id="paste" placeholder="🔒 Encrypted message ([MEPHEDRONE]). Read it: …"></textarea>
+  </section>
+
+  <section class="card" id="keyCard" hidden>
+    <h2>Unlock</h2>
+    <label for="pass">Chat passphrase (the sender gave it to you)</label>
+    <input id="pass" type="password" autocomplete="off" placeholder="Passphrase">
+    <div class="row">
+      <button id="unlock">Read message</button>
+      <label class="check"><input id="remember" type="checkbox" checked> Remember for this chat on this device</label>
+    </div>
+    <div class="status" id="keyStatus" role="status"></div>
+  </section>
+
+  <section class="card" id="readCard" hidden>
+    <h2>Message</h2>
+    <div class="msg" id="plain"></div>
+    <div class="row"><button class="ghost" id="forget">Forget passphrase</button></div>
+  </section>
+
+  <section class="card" id="replyCard" hidden>
+    <h2>Reply encrypted</h2>
+    <label for="reply">Write your reply, then paste the result into Discord</label>
+    <textarea id="reply" placeholder="Your reply"></textarea>
+    <div class="row"><button id="encrypt">Encrypt &amp; copy</button></div>
+    <div class="status" id="replyStatus" role="status"></div>
+    <div class="out" id="out" hidden></div>
+  </section>
+
+  <p class="note"><b>Nothing leaves your browser.</b> The message travels inside the link after the <code>#</code>, which browsers never send to any server, and decryption runs on this device (AES-256-GCM). This page loads no scripts, fonts or trackers from anywhere.</p>
+</main>
+
+<script>
+"use strict";
+const PAGE = location.origin + location.pathname;
+const $ = id => document.getElementById(id);
+const enc = new TextEncoder(), dec = new TextDecoder();
+const b64 = u => btoa(String.fromCharCode(...u)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const unb64 = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+let chat = null, cipher = null, key = null;
+
+function parse(text) {
+  const c = /[#&]c=(\d{5,25})/.exec(text), m = /[#&]m=([A-Za-z0-9_-]{24,})/.exec(text);
+  return c && m ? { c: c[1], m: m[1] } : null;
+}
+
+async function derive(pass, channel) {
+  const base = await crypto.subtle.importKey("raw", enc.encode(pass), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: enc.encode("mephedrone-e2e-v2:" + channel), iterations: 250000 }, base, 256);
+  return new Uint8Array(bits);
+}
+const importKey = raw => crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt", "decrypt"]);
+
+async function decrypt(k, body) {
+  const data = unb64(body);
+  return dec.decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: data.subarray(0, 12) }, k, data.subarray(12)));
+}
+
+async function encrypt(k, text) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, k, enc.encode(text)));
+  const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12);
+  return b64(out);
+}
+
+const store = {
+  get(c) { try { return localStorage.getItem("meph:" + c); } catch { return null; } },
+  set(c, v) { try { localStorage.setItem("meph:" + c, v); } catch {} },
+  del(c) { try { localStorage.removeItem("meph:" + c); } catch {} },
+};
+
+async function show() {
+  try {
+    $("plain").textContent = await decrypt(key, cipher);
+    $("keyCard").hidden = true; $("readCard").hidden = false; $("replyCard").hidden = false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function load(parsed) {
+  chat = parsed.c; cipher = parsed.m;
+  $("pasteCard").hidden = true;
+  const saved = store.get(chat);
+  if (saved) {
+    key = await importKey(unb64(saved));
+    if (await show()) return;
+    store.del(chat);
+  }
+  $("keyCard").hidden = false;
+  $("pass").focus();
+}
+
+$("unlock").onclick = async () => {
+  const pass = $("pass").value;
+  if (!pass) return;
+  $("unlock").disabled = true; $("keyStatus").className = "status"; $("keyStatus").textContent = "Unlocking…";
+  const raw = await derive(pass, chat);
+  key = await importKey(raw);
+  if (await show()) {
+    if ($("remember").checked) store.set(chat, b64(raw));
+    $("keyStatus").textContent = "";
+  } else {
+    $("keyStatus").className = "status bad"; $("keyStatus").textContent = "Wrong passphrase for this chat.";
+  }
+  $("unlock").disabled = false;
+};
+$("pass").addEventListener("keydown", e => { if (e.key === "Enter") $("unlock").click(); });
+
+$("forget").onclick = () => { store.del(chat); key = null; $("readCard").hidden = true; $("replyCard").hidden = true; $("keyCard").hidden = false; $("pass").value = ""; };
+
+$("encrypt").onclick = async () => {
+  const text = $("reply").value.trim();
+  if (!text) return;
+  if (text.length > 1350) { $("replyStatus").className = "status bad"; $("replyStatus").textContent = "Keep it under 1350 characters."; return; }
+  const body = await encrypt(key, text);
+  const msg = `🔒 Encrypted message ([MEPHEDRONE]). Read it: <${PAGE}#c=${chat}&m=${body}>`;
+  $("out").textContent = msg; $("out").hidden = false;
+  try { await navigator.clipboard.writeText(msg); $("replyStatus").className = "status ok"; $("replyStatus").textContent = "Copied. Paste it into Discord."; }
+  catch { $("replyStatus").className = "status"; $("replyStatus").textContent = "Select the text below and copy it into Discord."; }
+};
+
+$("paste").addEventListener("input", () => { const p = parse($("paste").value); if (p) load(p); });
+
+const initial = parse(location.hash);
+if (initial) { history.replaceState(null, "", PAGE); load(initial); } else $("pasteCard").hidden = false;
+</script>
+</body>
+</html>

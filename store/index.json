@@ -1,0 +1,129 @@
+{
+  "name": "[MEPHEDRONE] Store",
+  "updated": "2026-11-23",
+  "plugins": [
+    {
+      "id": "compact-mode",
+      "name": "Compact Mode",
+      "version": "1.0.0",
+      "author": "MEPHEDRONE",
+      "icon": "🗜️",
+      "description": "Fits more on screen: tighter messages, smaller server icons and a slimmer channel list.",
+      "category": "Appearance",
+      "permissions": [
+        "style"
+      ],
+      "settings": {
+        "strength": {
+          "type": "select",
+          "label": "How compact",
+          "default": "medium",
+          "options": [
+            [
+              "light",
+              "A little"
+            ],
+            [
+              "medium",
+              "Medium"
+            ],
+            [
+              "max",
+              "As tight as possible"
+            ]
+          ]
+        }
+      },
+      "code": "plugins/compact-mode/plugin.js",
+      "sha256": "009f7b3cb0292ea3637ddc22c316323a078eba5e9ce8bbfd22a88ba0088aec8a"
+    },
+    {
+      "id": "dice",
+      "name": "Dice & Coin",
+      "version": "1.0.0",
+      "author": "MEPHEDRONE",
+      "icon": "🎲",
+      "description": "/roll 2d6, /roll d20+3 and /flip. Results are posted in the chat so everyone sees them.",
+      "category": "Fun",
+      "permissions": [
+        "commands",
+        "messages.send"
+      ],
+      "code": "plugins/dice/plugin.js",
+      "sha256": "64dcbab2e02c9a3a76705e668815c4870016a07dc7f9e3ca75650980f04e9023"
+    },
+    {
+      "id": "keyword-alerts",
+      "name": "Keyword Alerts",
+      "version": "1.0.0",
+      "author": "MEPHEDRONE",
+      "icon": "🔔",
+      "description": "Pops up a notification when someone says one of your words (your name, a game, a topic) in any chat.",
+      "category": "Notifications",
+      "permissions": [
+        "messages.read",
+        "notify"
+      ],
+      "settings": {
+        "keywords": {
+          "type": "string",
+          "label": "Words to watch (comma separated)",
+          "default": ""
+        }
+      },
+      "code": "plugins/keyword-alerts/plugin.js",
+      "sha256": "1913b197acec10268c0002f19bc8e2dfb0316cf15abde88c8dea2d6fc09cdf90"
+    },
+    {
+      "id": "text-tools",
+      "name": "Text Tools",
+      "version": "1.0.0",
+      "author": "MEPHEDRONE",
+      "icon": "🔤",
+      "description": "/mock tExT lIkE tHiS, /reverse, /clap 👏 between 👏 words, /tiny ˢᵐᵃˡˡ ᵗᵉˣᵗ and /wide ｗｉｄｅ text.",
+      "category": "Fun",
+      "permissions": [
+        "commands",
+        "messages.send"
+      ],
+      "code": "plugins/text-tools/plugin.js",
+      "sha256": "88f587a0cda6d8e30238ebcdf464e919adf76ddf549b1317fdfc0e6b537b6c1a"
+    },
+    {
+      "id": "weather",
+      "name": "Weather",
+      "version": "1.0.0",
+      "author": "MEPHEDRONE",
+      "icon": "🌦️",
+      "description": "/weather London shows current conditions (only you see the answer). Uses the free Open-Meteo service, no account or tracking.",
+      "category": "Utility",
+      "permissions": [
+        "commands",
+        "network"
+      ],
+      "network": [
+        "api.open-meteo.com",
+        "geocoding-api.open-meteo.com"
+      ],
+      "settings": {
+        "units": {
+          "type": "select",
+          "label": "Units",
+          "default": "metric",
+          "options": [
+            [
+              "metric",
+              "°C, km/h"
+            ],
+            [
+              "imperial",
+              "°F, mph"
+            ]
+          ]
+        }
+      },
+      "code": "plugins/weather/plugin.js",
+      "sha256": "71e20277b10091c87c8ce95680bd0b588e40b7f7e4bb4cf99f80da382222011f"
+    }
+  ]
+}
